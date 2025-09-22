@@ -1,14 +1,14 @@
-# Domain Driven Design with Ports & Adapters Rules for Python Implementation
+# Domain Driven Design with Ports & Adapters Rules
 
 ## Core Domain Model Rules
 
 ### 1. Entity Rules
+
 - Entities MUST have a unique identity that persists throughout their lifecycle
-- Use `@dataclass` with `frozen=False` for mutable entities
-- Identity should be immutable once set (use `field(init=False)` for auto-generated IDs)
-- Implement `__eq__` and `__hash__` based solely on identity, not attributes
+- Identity should be immutable once set
+- Implement `equality` and `hash` based solely on identity, not attributes/fields
 - Entities MUST contain business logic as methods, not just data
-- Avoid anemic domain models - entities should have behavior
+  - Avoid anemic domain models - entities should have behavior
 
 ```python
 @dataclass
@@ -16,38 +16,40 @@ class User:
     id: UserId = field(init=False)
     email: Email
     name: str
-    
+
     def __post_init__(self):
         if not hasattr(self, 'id'):
             self.id = UserId.generate()
-    
+
     def change_email(self, new_email: Email) -> None:
         # Business logic here
         self.email = new_email
 ```
 
 ### 2. Value Object Rules
-- Value objects MUST be immutable - use `@dataclass(frozen=True)`
+
+- Value objects MUST be immutable
 - Equality is based on ALL attributes, not identity
 - Should be small, focused, and represent a concept from the domain
-- Include validation in `__post_init__` method
+- Include validation in constructor
 - Should have meaningful methods that operate on the value
 
 ```python
 @dataclass(frozen=True)
 class Email:
     value: str
-    
+
     def __post_init__(self):
         if '@' not in self.value:
             raise ValueError("Invalid email format")
-    
+
     @property
     def domain(self) -> str:
         return self.value.split('@')[1]
 ```
 
 ### 3. Aggregate Rules
+
 - Aggregates MUST have a single Aggregate Root (an Entity)
 - Only the Aggregate Root should be directly accessible from outside
 - Internal entities within an aggregate should be accessed through the root
@@ -61,18 +63,19 @@ class Order:  # Aggregate Root
     id: OrderId
     customer_id: CustomerId
     _line_items: list[OrderLineItem] = field(default_factory=list, init=False)
-    
+
     def add_line_item(self, product_id: ProductId, quantity: int) -> None:
         # Business rules and validation
         line_item = OrderLineItem(product_id, quantity)
         self._line_items.append(line_item)
-    
+
     @property
     def line_items(self) -> tuple[OrderLineItem, ...]:
         return tuple(self._line_items)  # Return immutable view
 ```
 
 ### 4. Domain Service Rules
+
 - Create domain services ONLY when business logic doesn't naturally fit in entities or value objects
 - Domain services should be stateless
 - Use dependency injection for external dependencies
@@ -83,7 +86,7 @@ class Order:  # Aggregate Root
 class PricingService:
     def __init__(self, discount_repository: DiscountRepository):
         self._discount_repository = discount_repository
-    
+
     def calculate_order_total(self, order: Order, customer: Customer) -> Money:
         # Complex pricing logic that spans multiple aggregates
         pass
@@ -92,6 +95,7 @@ class PricingService:
 ## Repository Pattern Rules
 
 ### 5. Repository Interface Rules
+
 - Define repository interfaces in the domain layer using ABC - they represent domain concepts
 - Repositories should work with Aggregate Roots only
 - Use domain-specific query methods, not generic CRUD
@@ -106,21 +110,22 @@ class UserRepository(ABC):
     @abstractmethod
     def find_by_email(self, email: Email) -> Optional[User]:
         pass
-    
+
     @abstractmethod
     def save(self, user: User) -> None:
         pass
-    
+
     @abstractmethod
     def find_active_users_in_department(self, department_id: DepartmentId) -> list[User]:
         pass
-    
+
     @abstractmethod
     def find_by_id(self, user_id: UserId) -> Optional[User]:
         pass
 ```
 
 ### 6. Repository Implementation Rules
+
 - Implement repositories in the infrastructure layer
 - Use the Unit of Work pattern for transaction management
 - Map between domain objects and persistence models
@@ -130,6 +135,7 @@ class UserRepository(ABC):
 ## Domain Event Rules
 
 ### 7. Domain Event Rules
+
 - Domain events should be immutable value objects
 - Events should represent something that happened in the past (use past tense)
 - Events should contain all necessary data to handle the event
@@ -146,6 +152,7 @@ class UserEmailChanged:
 ```
 
 ### 8. Event Handling Rules
+
 - Domain event handlers should be in the application layer
 - Handlers should be idempotent
 - Use dependency injection for handler dependencies
@@ -155,6 +162,7 @@ class UserEmailChanged:
 ## Application Service Rules
 
 ### 9. Use Case Rules
+
 - Use cases represent single business operations that the application can perform
 - Each use case should handle exactly one business workflow
 - Use cases orchestrate domain objects but contain no business logic
@@ -166,7 +174,7 @@ class UserEmailChanged:
 ```python
 class CreateUserUseCase:
     def __init__(
-        self, 
+        self,
         user_repository: UserRepository,
         unit_of_work: UnitOfWork,
         event_publisher: EventPublisher
@@ -174,7 +182,7 @@ class CreateUserUseCase:
         self._user_repository = user_repository
         self._unit_of_work = unit_of_work
         self._event_publisher = event_publisher
-    
+
     def execute(self, command: CreateUserCommand) -> CreateUserResponse:
         with self._unit_of_work:
             # Orchestration logic only
@@ -188,7 +196,7 @@ class ChangeUserEmailUseCase:
     def __init__(self, user_repository: UserRepository, unit_of_work: UnitOfWork):
         self._user_repository = user_repository
         self._unit_of_work = unit_of_work
-    
+
     def execute(self, command: ChangeEmailCommand) -> None:
         with self._unit_of_work:
             user = self._user_repository.find_by_id(command.user_id)
@@ -201,9 +209,10 @@ class ChangeUserEmailUseCase:
 ## Ports & Adapters (Hexagonal Architecture) Rules
 
 ### 10. Port Definition Rules
+
 - Ports define interfaces between layers and external systems
 - **Primary ports** (driving) define application use cases - belong in application layer
-- **Domain-driven secondary ports** (repositories, domain services) - belong in domain layer  
+- **Domain-driven secondary ports** (repositories, domain services) - belong in domain layer
 - **Infrastructure secondary ports** (email, messaging, external APIs) - belong in application layer
 - Port interfaces should use domain language, not technical terms
 - Ports should be focused and follow Single Responsibility Principle
@@ -237,7 +246,7 @@ class EmailNotificationPort(ABC):
     @abstractmethod
     def send_welcome_email(self, user_email: Email, user_name: str) -> None:
         pass
-    
+
     @abstractmethod
     def send_email_change_notification(self, old_email: Email, new_email: Email) -> None:
         pass
@@ -249,6 +258,7 @@ class EventPublisherPort(ABC):
 ```
 
 ### 11. Primary Adapter Rules
+
 - Primary adapters are the entry points (web controllers, CLI, message consumers)
 - Should translate external requests to domain commands/queries
 - Must not contain business logic - only translation and validation
@@ -345,6 +355,7 @@ async def deactivate_user(
 ```
 
 ### 12. Secondary Adapter Rules
+
 - Secondary adapters implement secondary ports defined in domain/application layers
 - Organize secondary adapters by technology for shared infrastructure and easier maintenance
 - Should handle all external system complexities (database mapping, API calls, etc.)
@@ -358,7 +369,7 @@ async def deactivate_user(
 class SqlUserRepository(UserRepository):
     def __init__(self, session: Session):
         self._session = session
-    
+
     def save(self, user: User) -> None:
         user_model = UserModel(
             id=user.id.value,
@@ -367,11 +378,11 @@ class SqlUserRepository(UserRepository):
             version=user.version
         )
         self._session.merge(user_model)
-    
+
     def find_by_email(self, email: Email) -> Optional[User]:
         model = self._session.query(UserModel).filter_by(email=email.value).first()
         return self._to_domain(model) if model else None
-    
+
     def _to_domain(self, model: UserModel) -> User:
         return User(
             id=UserId(model.id),
@@ -384,7 +395,7 @@ class HttpEmailNotificationAdapter(EmailNotificationPort):
     def __init__(self, http_client: HTTPClient, api_config: EmailAPIConfig):
         self._http_client = http_client
         self._api_config = api_config
-    
+
     def send_welcome_email(self, user_email: Email, user_name: str) -> None:
         payload = {
             'to': user_email.value,
@@ -401,6 +412,7 @@ class HttpEmailNotificationAdapter(EmailNotificationPort):
 ```
 
 ### 13. Adapter Configuration Rules
+
 - Use Dependency Injection container to wire adapters to ports
 - Configuration should happen at application startup in a composition root
 - Adapters should be configurable through environment variables or config files
@@ -416,27 +428,27 @@ class DIContainer:
         self._sql_session = self._create_sql_session()
         self._mongo_client = self._create_mongo_client()
         self._http_client = self._create_http_client()
-    
+
     # Domain port implementations (SQL technology)
     def sql_user_repository(self) -> UserRepository:
         return SqlUserRepository(self._sql_session)
-    
-    # Domain port implementations (MongoDB technology)  
+
+    # Domain port implementations (MongoDB technology)
     def mongo_user_repository(self) -> UserRepository:
         return MongoUserRepository(self._mongo_client)
-    
+
     # Infrastructure port implementations
     def http_email_notification_service(self) -> EmailNotificationPort:
         return HttpEmailNotificationAdapter(
             self._http_client,
             self._config.email_api_config
         )
-    
+
     def rabbitmq_event_publisher(self) -> EventPublisherPort:
         return RabbitMqEventPublisher(
             connection=self._create_rabbitmq_connection()
         )
-    
+
     # Use case implementations
     def create_user_use_case(self) -> CreateUserPort:
         return CreateUserUseCase(
@@ -447,7 +459,103 @@ class DIContainer:
         )
 ```
 
+## Integrated Project Structure Rules
+
+## Integrated Project Structure Rules
+
+### 14. Hexagonal Package Structure Rules
+
+- Organize by hexagonal architecture layers with clear port placement
+- **Domain ports**: Repository interfaces and domain service ports in domain layer
+- **Application ports**: Primary ports (use cases) and infrastructure service ports in application layer
+- **Secondary adapters**: Organize by technology for shared infrastructure and easier maintenance
+- **Technology-specific models**: Persistence models live within their respective technology adapters
+- **Configuration layer**: Cross-cutting concerns that wire all layers together
+- Domain and application layers should only depend on their respective port interfaces
+- Infrastructure layer contains all adapter implementations
+
+```txt
+src/
+├── domain/
+│   ├── model/
+│   │   ├── user/
+│   │   │   ├── user.py              # Entity
+│   │   │   └── email.py             # Value Object
+│   │   └── order/
+│   ├── ports/                       # Domain Ports (Secondary)
+│   │   ├── user_repository.py       # Repository interface (domain concept)
+│   │   ├── order_repository.py
+│   │   ├── pricing_service_port.py  # Domain service interface
+│   │   ├── inventory_service_port.py
+│   │   └── domain_event_store_port.py  # Domain-specific event storage
+│   └── events/                      # Domain Events
+├── application/
+│   ├── ports/
+│   │   ├── primary/                 # Primary Ports (Use Cases)
+│   │   │   ├── create_user_port.py          # Primary Port
+│   │   │   ├── change_user_email_port.py    # Primary Port
+│   │   │   └── deactivate_user_port.py      # Primary Port
+│   │   └── secondary/               # Infrastructure Ports (Secondary)
+│   │       ├── email_notification_port.py   # Infrastructure service
+│   │       ├── event_publisher_port.py      # Infrastructure service
+│   │       └── payment_gateway_port.py      # Infrastructure service
+│   ├── use_cases/
+│   │   ├── create_user_use_case.py          # Use Case (Primary Port Implementation)
+│   │   ├── change_user_email_use_case.py    # Use Case (Primary Port Implementation)
+│   │   └── deactivate_user_use_case.py      # Use Case (Primary Port Implementation)
+│   ├── commands/
+│   ├── queries/
+│   └── handlers/
+├── infrastructure/
+│   └── adapters/
+│       ├── primary/
+│       │   ├── web/
+│       │   │   ├── user_controller.py       # Primary Adapter
+│       │   │   └── order_controller.py
+│       │   ├── cli/
+│       │   └── messaging/
+│       └── secondary/                       # Organized by Technology
+│           ├── sql/
+│           │   ├── models/                          # SQLAlchemy models
+│           │   │   ├── user_model.py
+│           │   │   └── order_model.py
+│           │   ├── base_sql_repository.py          # Shared base class
+│           │   ├── sql_connection_manager.py       # Shared connection handling
+│           │   ├── sql_user_repository.py          # Implements UserRepository
+│           │   ├── sql_order_repository.py         # Implements OrderRepository
+│           │   └── sql_domain_event_store.py       # Implements DomainEventStorePort
+│           ├── mongodb/
+│           │   ├── schemas/                         # MongoDB schemas
+│           │   │   ├── user_schema.py
+│           │   │   └── order_schema.py
+│           │   ├── mongo_connection.py             # Shared connection
+│           │   ├── mongo_user_repository.py        # Implements UserRepository
+│           │   └── mongo_order_repository.py       # Implements OrderRepository
+│           ├── http/
+│           │   ├── base_http_client.py             # Shared HTTP utilities
+│           │   ├── http_retry_policy.py            # Shared retry logic
+│           │   ├── http_pricing_service.py         # Implements PricingServicePort
+│           │   ├── http_payment_gateway.py         # Implements PaymentGatewayPort
+│           │   └── http_email_service.py           # Implements EmailNotificationPort
+│           ├── messaging/
+│           │   ├── rabbitmq_connection.py          # Shared connection
+│           │   ├── rabbitmq_event_publisher.py     # Implements EventPublisherPort
+│           │   └── rabbitmq_notification_sender.py # Implements NotificationPort
+│           └── redis/
+│               ├── redis_connection.py             # Shared connection
+│               ├── redis_cache_service.py          # Implements CacheServicePort
+│               └── redis_session_store.py          # Implements SessionStorePort
+└── configuration/                           # Cross-cutting Configuration Layer
+    ├── di_container.py                      # Dependency injection container
+    ├── database_config.py                  # Database configuration
+    ├── app_settings.py                     # Application settings
+    └── environment_config.py               # Environment-specific config
+```
+
+### 15. Integration Flow Rules
+
 ### 14. Integration Flow Rules
+
 - Primary adapters call primary ports (use cases)
 - Use cases orchestrate domain objects and use secondary ports for external systems
 - Secondary adapters implement secondary ports and handle external complexities
@@ -473,14 +581,16 @@ class CreateUserUseCase(CreateUserPort):  # Primary Port Implementation
 
 ## Synergy Rules for DDD + Ports & Adapters
 
-### 15. Repository as Secondary Port Rules
+### 16. Repository as Secondary Port Rules
+
 - Repository interfaces are domain ports (interfaces in domain layer)
 - Repository implementations are secondary adapters (in infrastructure layer)
 - Repositories should work with Aggregate Roots and use domain language
 - Repository adapters handle ORM mapping and database specifics
 - Keep repository interfaces focused on domain needs, not database capabilities
 
-### 16. Use Case as Primary Port Implementation Rules
+### 17. Use Case as Primary Port Implementation Rules
+
 - Use cases implement primary ports and orchestrate domain objects
 - They use both domain ports (repositories) and infrastructure ports (email, messaging)
 - Should not contain business logic - delegate to domain objects
@@ -501,7 +611,7 @@ class CreateUserUseCase(CreateUserPort):
         self._email_service = email_service
         self._event_publisher = event_publisher
         self._unit_of_work = unit_of_work
-    
+
     def execute(self, command: CreateUserCommand) -> CreateUserResponse:
         with self._unit_of_work:
             email = Email(command.email)
@@ -512,7 +622,8 @@ class CreateUserUseCase(CreateUserPort):
             return CreateUserResponse(user.id.value)
 ```
 
-### 17. Event Integration Rules
+### 18. Event Integration Rules
+
 - Domain events should be published through infrastructure ports
 - Event handlers can be implemented as separate use cases
 - Use event-driven architecture for cross-bounded context communication
@@ -528,13 +639,13 @@ class EventPublisherPort(ABC):  # Application layer
 
 class CreateUserUseCase(CreateUserPort):
     def __init__(
-        self, 
+        self,
         user_repo: UserRepository,  # Domain port
         event_publisher: EventPublisherPort  # Infrastructure port
     ):
         self._user_repo = user_repo
         self._event_publisher = event_publisher
-    
+
     def execute(self, command: CreateUserCommand) -> CreateUserResponse:
         user = User.create(Email(command.email), command.name)
         self._user_repo.save(user)  # Domain port
@@ -545,12 +656,13 @@ class CreateUserUseCase(CreateUserPort):
 class SendWelcomeEmailUseCase:
     def __init__(self, email_service: EmailNotificationPort):  # Infrastructure port
         self._email_service = email_service
-    
+
     def handle(self, event: UserCreated) -> None:
         self._email_service.send_welcome_email(event.email, event.name)
 ```
 
-### 18. Cross-Cutting Concern Rules
+### 19. Cross-Cutting Concern Rules
+
 - Handle infrastructure concerns (logging, metrics, caching) in adapters
 - Use decorators or middleware patterns for cross-cutting concerns
 - Keep domain objects free from infrastructure dependencies
@@ -579,6 +691,7 @@ class SqlUserRepository(UserRepository):
 ```
 
 ## Validation and Error Handling Rules
+
 - Test domain logic in isolation without any adapters
 - Test primary adapters by mocking primary ports
 - Test secondary adapters by mocking external dependencies
@@ -593,10 +706,10 @@ class TestUserManagementService:
         mock_repo = Mock(spec=UserRepository)
         mock_events = Mock(spec=EventPublisherPort)
         service = UserManagementService(mock_repo, mock_events)
-        
+
         # Act
         result = service.create_user(CreateUserCommand("test@example.com", "John"))
-        
+
         # Assert
         mock_repo.save.assert_called_once()
         mock_events.publish.assert_called_once()
@@ -606,15 +719,16 @@ class TestUserManagementService:
 class InMemoryUserRepository(UserRepository):
     def __init__(self):
         self._users: dict[UserId, User] = {}
-    
+
     def save(self, user: User) -> None:
         self._users[user.id] = user
-    
+
     def find_by_email(self, email: Email) -> Optional[User]:
         return next((u for u in self._users.values() if u.email == email), None)
 ```
 
-### 19. Validation and Error Handling Rules
+### 21. Validation and Error Handling Rules
+
 - Domain validation should happen in domain objects (entities, value objects)
 - Use domain exceptions that extend a base domain exception
 - Validation should be explicit and fail fast
@@ -631,15 +745,16 @@ class InvalidEmailError(DomainException):
 @dataclass(frozen=True)
 class Email:
     value: str
-    
+
     def __post_init__(self):
         if not self._is_valid_email(self.value):
             raise InvalidEmailError(f"Invalid email: {self.value}")
 ```
 
-### 20. Naming Convention Rules
+### 22. Naming Convention Rules
+
 - Use domain language (Ubiquitous Language) for all class and method names
-- Avoid technical terms in domain layer (no "Manager", "Helper", "Util")  
+- Avoid technical terms in domain layer (no "Manager", "Helper", "Util")
 - Use intention-revealing names for methods
 - Value objects should be named after the concept they represent
 - Repository methods should reflect business queries
@@ -653,7 +768,7 @@ class UserManagementPort(ABC): pass           # Primary port
 class EmailNotificationPort(ABC): pass       # Secondary port
 class PaymentProcessingPort(ABC): pass       # Secondary port
 
-# Good adapter names  
+# Good adapter names
 class RestUserController:                    # Primary adapter (REST)
 class GraphQLUserController:                 # Primary adapter (GraphQL)
 class SqlUserRepository(UserRepository):     # Secondary adapter (SQL)
@@ -662,7 +777,8 @@ class SmtpEmailAdapter(EmailNotificationPort): # Secondary adapter (SMTP)
 class SendGridEmailAdapter(EmailNotificationPort): # Secondary adapter (SendGrid)
 ```
 
-### 21. Dependency Rules
+### 23. Dependency Rules
+
 - Domain layer should have no external dependencies except standard library
 - Application layer can depend on domain but should use dependency inversion for external concerns
 - Infrastructure layer implements all external dependencies through adapters
@@ -681,7 +797,7 @@ class User:  # Domain entity
         self.id = id
         self.email = email
         self.name = name
-    
+
     def change_email(self, new_email: Email) -> None:
         # Business logic here
         self.email = new_email
@@ -689,7 +805,7 @@ class User:  # Domain entity
 class UserDomainService:  # Domain service
     def __init__(self, user_repo: UserRepository):  # Domain port dependency
         self._user_repo = user_repo
-    
+
     def is_email_unique(self, email: Email) -> bool:
         existing_user = self._user_repo.find_by_email(email)
         return existing_user is None
@@ -697,7 +813,7 @@ class UserDomainService:  # Domain service
 # Application layer - depends on domain + infrastructure ports
 class CreateUserUseCase(CreateUserPort):
     def __init__(
-        self, 
+        self,
         user_repo: UserRepository,  # Domain port
         user_domain_service: UserDomainService,  # Domain service
         email_service: EmailNotificationPort,  # Infrastructure port
@@ -718,7 +834,8 @@ class SmtpEmailAdapter(EmailNotificationPort):  # Implements infrastructure port
         self._smtp_client = smtp_client
 ```
 
-### 22. Testing Rules
+### 24. Testing Rules
+
 - Write unit tests for domain logic without mocking domain objects
 - **Test Ports in Isolation**: Mock secondary ports when testing use cases
 - **Test Adapters Separately**: Test each adapter implementation independently
@@ -748,10 +865,10 @@ class TestCreateUserUseCaseIntegration:
         email_service = InMemoryEmailService()
         event_publisher = InMemoryEventPublisher()
         use_case = CreateUserUseCase(user_repo, email_service, event_publisher)
-        
+
         # Act
         result = use_case.execute(CreateUserCommand("test@example.com", "John"))
-        
+
         # Assert
         assert result.user_id is not None
         saved_user = user_repo.find_by_email(Email("test@example.com"))
@@ -766,15 +883,15 @@ class TestSqlUserRepository:
         session = create_test_sql_session()
         repository = SqlUserRepository(session)
         user = User.create(Email("test@example.com"), "John")
-        
+
         # Act
         repository.save(user)
-        
+
         # Assert
         saved_user = repository.find_by_email(Email("test@example.com"))
         assert saved_user is not None
         assert saved_user.email == user.email
-        
+
         # Verify SQL model was created correctly
         user_model = session.query(UserModel).filter_by(email="test@example.com").first()
         assert user_model is not None
@@ -786,10 +903,10 @@ class TestMongoUserRepository:
         mongo_client = create_test_mongo_client()
         repository = MongoUserRepository(mongo_client)
         user = User.create(Email("test@example.com"), "John")
-        
+
         # Act
         repository.save(user)
-        
+
         # Assert
         saved_user = repository.find_by_email(Email("test@example.com"))
         assert saved_user is not None
