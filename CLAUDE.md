@@ -87,7 +87,7 @@ Follow this exact sequence for each user story:
 
 **Test Boundaries and Responsibilities**:
 
-- **Unit Tests**: Single class/module, mock dependencies, test domain behavior
+- **Unit Tests**: Single class/module, mock external dependencies, test domain behavior
 - **Integration Tests**: Adapter to external system, no mocks in boundary, test data transformation
 - **Contract Tests**: HTTP to use case, verify API contracts (status codes, headers, validation)
 - **Acceptance Tests**: Complete business flow, multiple operations, real user journey
