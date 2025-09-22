@@ -16,21 +16,17 @@ This document defines two complementary architectural approaches that work toget
 
 **Ports & Adapters** (Rules 1-12) focuses on architectural boundaries and external concerns:
 
-- **Driving Ports** define what your application can do (use case interfaces)
-- **Driven Ports** define what your application needs (repositories, external services)
+- **Driving Ports** define what your application can do AKA "**Entry Points**" (use case interfaces)
+- **Driven Ports** define what your application needs AKA "**Exit Points**" (repositories, external services)
 - **Driving Adapters** translate external requests into domain operations (REST controllers, CLI)
 - **Driven Adapters** implement external integrations (databases, APIs, file systems)
 
 ### Key Integration Principles
 
 1. **Domain Objects** (Entities, Value Objects, Aggregates) contain business logic and know nothing about persistence or external systems
-
 2. **Use Cases** orchestrate domain objects and coordinate with external systems through **Driven Ports**
-
 3. **Driving Adapters** translate external requests into domain commands and delegate to **Use Cases** through **Driving Ports**
-
 4. **Driven Adapters** implement **Driven Ports** and handle all external system complexity (databases, APIs, file systems, etc.)
-
 5. **Dependency Flow**: External → Driving Adapter → Use Case → Domain Objects → Driven Ports → Driven Adapters
 
 This creates a clean separation where:
@@ -1859,5 +1855,39 @@ Each use case in its own folder with kebab-case naming:
 - **Domain Errors**: Descriptive (e.g., `OverdraftLimitExceeded`)
 - **Repository**: `[Aggregate]Repository` (e.g., `NaiveBankAccountRepository`)
 - **Implementation**: `[Technology][Aggregate]Repository` (e.g., `PostgresNaiveBankAccountRepository`)
+
+## Pedro's Algorythm
+
+```text
+Write an acceptance test focused on behaviour // failing for the right reason (behaviour not implemented)
+Create interfaces for infrastructure as needed
+// Acceptance test should be RED (failing) -> Definition off DONE for behaviour being implemented
+// Don’t chase the acceptance test (don´t try to make it pass)
+
+While the acceptance test is failing {
+  Write a unit test focused on behaviour // failing for the right reason (behaviour not implemented)
+  While the unit test is failing {
+    Implement behaviour to pass the unit test
+    Create interfaces for infrastructure as needed
+    Commit on green
+  }
+}
+
+Commit // acceptance test should be green at this point -> may need to adjust the acceptance test due to design decision changes
+
+Write integration tests for driven adapter interfaces // repositories, proxies, message publishers ...
+Implement behaviour to pass integration tests // convert from/to infrastructure from/to domain
+Commit on green
+
+Write contract tests for drive adapters // HTTP controllers, Message Handlers, ...
+Implement behaviour to pass contract tests // convert from/to transport from/to domain
+Commit on green
+
+Optionally write End to End tests // Use the transport layer and infrastructure layer on the test (HTTP controllers, queue handlers, ...)
+// Probably only need to add configuration to pass
+Commit on green
+
+Push
+```
 
 This unified ruleset ensures consistent implementation of Domain Driven Design with Ports & Adapters architecture across all supported programming languages, providing clean separation of concerns, testability, and flexibility while maintaining domain focus and proper dependency management.
