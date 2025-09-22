@@ -6,9 +6,9 @@ This document defines three complementary approaches that work together to creat
 
 - Domain Driven Design (DDD)
 - Hexagonal Architecture or Ports & Adapters Architecture.
-- Command Query Responsability Segregations (CQRS)
+- Command Query Responsability Segregation (CQRS)
 
-Note: I used an LLM to convert the examples from Python to other languages, some of them I don't know well enough to judge on the quality of the examples.
+Note: I used an LLM to convert the examples from Python to other languages, some of them I don't know well enough to judge on the quality of the examples. Pull requests welcome.
 
 ### The Integration Pattern
 
