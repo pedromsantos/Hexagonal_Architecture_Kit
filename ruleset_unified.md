@@ -2015,7 +2015,7 @@ STEP 6: END-TO-END TESTS (OPTIONAL)
     │  Boundary: HTTP → Use Case                                              │
     │  Responsibility: API contract validation                                │
     │  Mocks: Nothing (real HTTP server, real database)                       │
-    │  Purpose: Verify driving adapter behavior and contracts                 │
+    │  Purpose: Verify driving adapter contracts                              │
     └─────────────────────────────────────────────────────────────────────────┘
     ┌─────────────────────────────────────────────────────────────────────────┐
     │                      ACCEPTANCE TESTS                                   │
@@ -2040,7 +2040,7 @@ STEP 6: END-TO-END TESTS (OPTIONAL)
     └─────────────────────────────────────────────────────────────────────────┘
 ```
 
-#### Unit Tests
+#### Unit Test examples
 
 **Boundary**: Single class or module
 **What it tests**: Pure business logic and behavior
@@ -2076,7 +2076,7 @@ test("RegisterUser orchestrates domain and infrastructure") {
 }
 ```
 
-#### Integration Tests
+#### Integration Test examples
 
 **Boundary**: Adapter to external system
 **What it tests**: Data transformation and external system interaction
@@ -2102,7 +2102,7 @@ test("PostgresUserRepository saves and retrieves users correctly") {
 }
 ```
 
-#### Acceptance Tests
+#### Acceptance Test examples
 
 **Boundary**: Controller to domain OR Use case to domain
 **What it tests**: Complete feature behavior
@@ -2131,35 +2131,37 @@ test("User can register with valid email") {
 }
 ```
 
-#### Contract Tests
+#### Contract Tests examples
 
-**Boundary**: HTTP to use case
+**Boundary**: HTTP → Use Case
 **What it tests**: API contracts and transport concerns
-**What it mocks**: Use cases and below
-**What it uses real**: HTTP layer, serialization, validation
+**What it mocks**: Nothing (real HTTP server, real database)
+**What it uses real**: Everything (HTTP server, database, external services)
 **Responsibility**:
 
+- API contract validation
 - HTTP status codes
 - Request/response format
+- Request/response headers
 - Input validation
 - Error response format
 - Authentication/authorization
+- Pagination
+- Filtering
+- Sorting
+- Content negotiation
 
 ```typescript
 test("POST /users returns 201 with valid user data") {
-  const mockUseCase = mock(RegisterUser)
-  when(mockUseCase.execute).thenReturn({
-    success: true,
-    userId: "uuid-123"
-  })
-
+  // Uses real HTTP server and real database
   const response = await request(app)
     .post('/users')
     .send({ email: 'test@example.com' })
 
   expect(response.status).toBe(201)
-  expect(response.body.id).toBe("uuid-123")
-  verify(mockUseCase.execute).calledWith({ email: 'test@example.com' })
+  expect(response.body.email).toBe('test@example.com')
+  expect(response.body.id).toBeDefined()
+  expect(response.headers['content-type']).toContain('application/json')
 }
 ```
 
