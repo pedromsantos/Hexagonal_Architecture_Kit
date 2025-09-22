@@ -2550,3 +2550,4 @@ The initial ruleset was entirely taken from: <https://github.com/bardiakhosravi/
 - Codely: <https://codely.com/en/blog/how-to-implement-ddd-code-using-ai>
 - Los Techies: <https://lostechies.com/jimmybogard/2008/05/21/entities-value-objects-aggregates-and-roots/>
 - Herberto Graça: <https://herbertograca.com/2017/07/03/the-software-architecture-chronicles//>
+- CQRS: <https://martinfowler.com/bliki/CQRS.html>
