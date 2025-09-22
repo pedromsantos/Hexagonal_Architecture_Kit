@@ -1736,8 +1736,6 @@ The testing strategy combines DDD and Ports & Adapters patterns to ensure compre
 
 #### Pedro's Algorithm: Test-Driven User Story Implementation
 
-## Pedro's Algorythm
-
 ```text
 Write an acceptance test focused on behaviour // failing for the right reason (behaviour not implemented)
 Create interfaces for infrastructure as needed
@@ -1781,48 +1779,48 @@ DEPENDENCY FLOW: External → Driving Adapter → Use Case → Domain Objects �
 
 STEP 1: ACCEPTANCE TEST (OUTSIDE-IN) - Choose Your Starting Point
 ┌─────────────────────────────────────────────────────────────────────────────────────┐
-│ 🔴 RED: Write acceptance test focused on behaviour (FAILING)                        │
+│ RED: Write acceptance test focused on behaviour (FAILING)                           │
 │                                                                                     │
-│ OPTION 1: Start from Controller Layer (App-Focused)                      │
-│    test("user can register with email via controller") {                          │
-│      const mockRepo = mock(UserRepository)                                        │
-│      const mockEvents = mock(EventPublisher)                                      │
-│      const controller = new UserController(mockRepo, mockEvents)                  │
+│ OPTION 1: Start from Controller Layer (App-Focused)                                 │
+│    test("user can register with email via controller") {                            │
+│      const mockRepo = mock(UserRepository)                                          │
+│      const mockEvents = mock(EventPublisher)                                        │
+│      const controller = new UserController(mockRepo, mockEvents)                    │
 │                                                                                     │
-│      const result = await controller.register({                                   │
-│        email: "user@example.com"                                                  │
-│      })                                                                            │
+│      const result = await controller.register({                                     │
+│        email: "user@example.com"                                                    │
+│      })                                                                             │
 │                                                                                     │
-│      expect(result.status).toBe(201)                                             │
-│      expect(result.body.email).toBe("user@example.com")                          │
-│      verify(mockRepo.save).calledWith(instanceOf(User))                          │
-│    }                                                                               │
+│      expect(result.status).toBe(201)                                                │
+│      expect(result.body.email).toBe("user@example.com")                             │
+│      verify(mockRepo.save).calledWith(instanceOf(User))                             │
+│    }                                                                                │
 │                                                                                     │
-│ OPTION 2: Start from Use Case Layer (Domain-Focused)                              │
-│    test("user can register with email via use case") {                            │
-│      const mockRepo = mock(UserRepository)                                        │
-│      const mockEvents = mock(EventPublisher)                                      │
-│      const useCase = new RegisterUser(mockRepo, mockEvents)                       │
+│ OPTION 2: Start from Use Case Layer (Domain-Focused)                                │
+│    test("user can register with email via use case") {                              │
+│      const mockRepo = mock(UserRepository)                                          │
+│      const mockEvents = mock(EventPublisher)                                        │
+│      const useCase = new RegisterUser(mockRepo, mockEvents)                         │
 │                                                                                     │
-│      const result = await useCase.execute({                                       │
-│        email: "user@example.com"                                                  │
-│      })                                                                            │
+│      const result = await useCase.execute({                                         │
+│        email: "user@example.com"                                                    │
+│      })                                                                             │
 │                                                                                     │
-│      expect(result.userId).toBeDefined()                                          │
-│      expect(result.email).toBe("user@example.com")                               │
-│      verify(mockRepo.save).calledWith(instanceOf(User))                          │
-│      verify(mockEvents.publish).calledWith(instanceOf(UserRegistered))           │
-│    }                                                                               │
+│      expect(result.userId).toBeDefined()                                            │
+│      expect(result.email).toBe("user@example.com")                                  │
+│      verify(mockRepo.save).calledWith(instanceOf(User))                             │
+│      verify(mockEvents.publish).calledWith(instanceOf(UserRegistered))              │
+│    }                                                                                │
 │                                                                                     │
-│ ✅ Create interfaces for infrastructure as needed:                                  │
+│ Create interfaces for infrastructure as needed:                                     │
 │    - UserRepository (driven port)                                                   │
 │    - EventPublisher (driven port)                                                   │
 │                                                                                     │
-│ 📋 DEFINITION OF DONE: Acceptance test MUST remain RED until behaviour complete     │
+│ DEFINITION OF DONE: Acceptance test MUST remain RED until behaviour complete        │
 │                                                                                     │
-│ 🎯 CHOOSE YOUR STRATEGY:                                                            │                 │
-│    • Option 1: Controller focus, medium feedback, transport concerns              │
-│    • Option 2: Use case focus, fast feedback, pure business logic                 │
+│ CHOOSE YOUR STRATEGY:                                                               │
+│    • Option 1: Controller focus, medium feedback, transport concerns                │
+│    • Option 2: Use case focus, fast feedback, pure business logic                   │
 └─────────────────────────────────────────────────────────────────────────────────────┘
                                         │
                                         ▼
@@ -1834,155 +1832,154 @@ WHILE (acceptance test is RED) {
 
     STEP 2: UNIT TEST - Use Case Layer
     ┌───────────────────────────────────────────────────────────────────────────────┐
-    │ 🔴 RED: Write unit test for use case orchestration                           │
+    │ RED: Write unit test for use case orchestration                               │
     │                                                                               │
-    │    test("RegisterUser use case creates and saves user") {                    │
-    │      const mockRepo = mock(UserRepository)                                  │
-    │      const mockEvents = mock(EventPublisher)                                │
-    │      const useCase = new RegisterUser(mockRepo, mockEvents)                 │
+    │    test("RegisterUser use case creates and saves user") {                     │
+    │      const mockRepo = mock(UserRepository)                                    │
+    │      const mockEvents = mock(EventPublisher)                                  │
+    │      const useCase = new RegisterUser(mockRepo, mockEvents)                   │
     │                                                                               │
-    │      await useCase.execute({ email: "user@example.com" })                   │
+    │      await useCase.execute({ email: "user@example.com" })                     │
     │                                                                               │
-    │      verify(mockRepo.save).calledWith(instanceOf(User))                     │
-    │      verify(mockEvents.publish).calledWith(instanceOf(UserRegistered))      │
+    │      verify(mockRepo.save).calledWith(instanceOf(User))                       │
+    │      verify(mockEvents.publish).calledWith(instanceOf(UserRegistered))        │
     │    }                                                                          │
     │                                                                               │
-    │ 🟢 GREEN: Implement RegisterUser use case                                    │
-    │ 🔵 REFACTOR: Extract command object                                          │
-    │ 💾 COMMIT: "Add RegisterUser use case with event publishing"                 │
+    │ GREEN: Implement RegisterUser use case                                        │
+    │ REFACTOR: Extract command object                                              │
+    │ COMMIT: "Add RegisterUser use case with event publishing"                     │
     └───────────────────────────────────────────────────────────────────────────────┘
                                         │
                                         ▼
     STEP 3: UNIT TEST - Domain Layer First
     ┌───────────────────────────────────────────────────────────────────────────────┐
-    │ 🔴 RED: Write unit test for domain behaviour                                  │
+    │ RED: Write unit test for domain behaviour                                     │
     │                                                                               │
-    │    test("User can be created with valid email") {                            │
-    │      const email = new Email("user@example.com")                            │
-    │      const user = User.create(userId, email)                                │
-    │      expect(user.email).toEqual(email)                                      │
-    │      expect(user.domainEvents).toContain(UserRegistered)                    │
-    │    }                                                                        │
-    │                                                                             │
-    │ 🟢 GREEN: Implement User aggregate, Email value object                       │
-    │ 🔵 REFACTOR: Clean up code                                                   │
-    │ 💾 COMMIT: "Add User aggregate with email validation"                        │
-    └──────────────────────────────────────────────────────────────────────────────┘
+    │    test("User can be created with valid email") {                             │
+    │      const email = new Email("user@example.com")                              │
+    │      const user = User.create(userId, email)                                  │
+    │      expect(user.email).toEqual(email)                                        │
+    │      expect(user.domainEvents).toContain(UserRegistered)                      │
+    │    }                                                                          │
+    │                                                                               │
+    │ GREEN: Implement User aggregate, Email value object                           │
+    │ REFACTOR: Clean up code                                                       │
+    │ COMMIT: "Add User aggregate with email validation"                            │
+    └───────────────────────────────────────────────────────────────────────────────┘
                                         │
                                         ▼
     REPEAT: Domain Events, Validation, etc.
     ┌───────────────────────────────────────────────────────────────────────────────┐
-    │ 🔴 RED: More unit tests as needed                                             │
-    │ 🟢 GREEN: Implement remaining domain logic                                    │
-    │ 🔵 REFACTOR: Clean up                                                         │
-    │ 💾 COMMIT: On each green                                                      │
+    │ RED: More unit tests as needed                                                │
+    │ GREEN: Implement remaining domain logic                                       │
+    │ REFACTOR: Clean up                                                            │
+    │ COMMIT: On each green                                                         │
     └───────────────────────────────────────────────────────────────────────────────┘
 
 } // END WHILE - Acceptance test should now be GREEN
 
-💾 COMMIT: "Complete user registration behaviour"
+COMMIT: "Complete user registration behaviour"
 
 ┌─────────────────────────────────────────────────────────────────────────────────────┐
 │                          INTEGRATION TESTS (DRIVEN ADAPTERS)                        │
 └─────────────────────────────────────────────────────────────────────────────────────┘
 
 STEP 4: DRIVEN ADAPTER INTEGRATION TESTS
-┌───────────────────────────────────────────────────────────────────────────────────────┐
-│ 🔴 RED: Test driven adapter interfaces (repositories, external services)             │
-│                                                                                       │
-│    test("PostgresUserRepository saves and retrieves users") {                        │
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│ RED: Test driven adapter interfaces (repositories, external services)               │
+│                                                                                     │
+│    test("PostgresUserRepository saves and retrieves users") {                       │
 │      const repo = new PostgresUserRepository(testDatabase)                          │
 │      const user = UserMother.create()                                               │
-│                                                                                       │
+│                                                                                     │
 │      await repo.save(user)                                                          │
-│      const retrieved = await repo.findById(user.id)                                │
-│                                                                                       │
-│      expect(retrieved).toEqual(user)                                               │
-│    }                                                                                  │
-│                                                                                       │
-│ 🟢 GREEN: Implement PostgresUserRepository                                           │
-│          - Convert from/to database schema to/from domain objects                    │
-│          - Handle database connections, transactions                                  │
-│                                                                                       │
-│ 🔵 REFACTOR: Extract mapping logic                                                   │
-│ 💾 COMMIT: "Add PostgreSQL user repository implementation"                           │
-└───────────────────────────────────────────────────────────────────────────────────────┘
+│      const retrieved = await repo.findById(user.id)                                 │
+│                                                                                     │
+│      expect(retrieved).toEqual(user)                                                │
+│    }                                                                                │
+│                                                                                     │
+│ GREEN: Implement PostgresUserRepository                                             │
+│          - Convert from/to database schema to/from domain objects                   │
+│          - Handle database connections, transactions                                │
+│                                                                                     │
+│ REFACTOR: Extract mapping logic                                                     │
+│ COMMIT: "Add PostgreSQL user repository implementation"                             │
+└─────────────────────────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────────────────────────┐
 │                          CONTRACT TESTS (DRIVING ADAPTERS)                          │
 └─────────────────────────────────────────────────────────────────────────────────────┘
 
 STEP 5: DRIVING ADAPTER CONTRACT TESTS
-┌───────────────────────────────────────────────────────────────────────────────────────┐
-│ 🔴 RED: Test driving adapters (HTTP controllers, message handlers)                   │
-│                                                                                       │
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│ RED: Test driving adapters (HTTP controllers, message handlers)                     │
+│                                                                                     │
 │    test("POST /api/users creates user and returns 201") {                           │
 │      const mockUseCase = mock(RegisterUser)                                         │
 │      const controller = new UserController(mockUseCase)                             │
-│                                                                                       │
+│                                                                                     │
 │      const response = await request(app)                                            │
 │        .post('/api/users')                                                          │
-│        .send({ email: 'user@example.com' })                                        │
-│                                                                                       │
-│      expect(response.status).toBe(201)                                             │
-│      expect(response.body.email).toBe('user@example.com')                          │
-│      verify(mockUseCase.execute).calledWith({ email: 'user@example.com' })         │
-│    }                                                                                  │
-│                                                                                       │
-│ 🟢 GREEN: Implement UserController                                                   │
+│        .send({ email: 'user@example.com' })                                         │
+│                                                                                     │
+│      expect(response.status).toBe(201)                                              │
+│      expect(response.body.email).toBe('user@example.com')                           │
+│      verify(mockUseCase.execute).calledWith({ email: 'user@example.com' })          │
+│    }                                                                                │
+│                                                                                     │
+│ GREEN: Implement UserController                                                     │
 │          - Convert from/to HTTP request/response to/from domain commands            │
-│          - Handle HTTP status codes, error responses                                 │
-│                                                                                       │
-│ 🔵 REFACTOR: Extract request validation                                              │
-│ 💾 COMMIT: "Add HTTP controller for user registration"                               │
-└───────────────────────────────────────────────────────────────────────────────────────┘
+│          - Handle HTTP status codes, error responses                                │
+│                                                                                     │
+│ REFACTOR: Extract request validation                                                │
+│ COMMIT: "Add HTTP controller for user registration"                                 │
+└─────────────────────────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────────────────────────┐
 │                               END-TO-END TESTS (OPTIONAL)                           │
 └─────────────────────────────────────────────────────────────────────────────────────┘
 
 STEP 6: END-TO-END TESTS (OPTIONAL)
-┌───────────────────────────────────────────────────────────────────────────────────────┐
-│ 🔴 RED: Test complete user journey through real transport and infrastructure         │
-│                                                                                       │
-│    test("User registration E2E") {                                                   │
-│      // Uses real HTTP server + real database                                        │
-│        const response = await fetch('/api/users', {                                   │
-│        method: 'POST',                                                              │
-│        body: JSON.stringify({ email: 'user@example.com' })                         │
-│      })                                                                              │
-│                                                                                       │
-│      expect(response.status).toBe(201)                                             │
-│      // Verify user exists in database                                              │
-│      const user = await database.users.findByEmail('user@example.com')             │
-│      expect(user).toBeDefined()                                                     │
-│    }                                                                                  │
-│                                                                                       │
-│ 🟢 GREEN: Add configuration to wire everything together                              │
-│          - Dependency injection setup                                                │
-│          - Database migrations                                                       │
-│          - Application startup                                                       │
-│                                                                                       │
-│ 💾 COMMIT: "Add end-to-end user registration test"                                   │
-└───────────────────────────────────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────────────────────────────────┐
+│ RED: Test complete user journey through real transport and infrastructure         │
+│                                                                                   │
+│    test("User registration E2E") {                                                │
+│      // Uses real HTTP server + real database                                     │
+│        const response = await fetch('/api/users', {                               │
+│        method: 'POST',                                                            │
+│        body: JSON.stringify({ email: 'user@example.com' })                        │
+│      })                                                                           │
+│                                                                                   │
+│      expect(response.status).toBe(201)                                            │
+│      // Verify user exists in database                                            │
+│      const user = await database.users.findByEmail('user@example.com')            │
+│      expect(user).toBeDefined()                                                   │
+│    }                                                                              │
+│                                                                                   │
+│ GREEN: Add configuration to wire everything together                              │
+│          - Dependency injection setup                                             │
+│          - Database migrations                                                    │
+│          - Application startup                                                    │
+│                                                                                   │
+│ COMMIT: "Add end-to-end user registration test"                                   │
+└───────────────────────────────────────────────────────────────────────────────────┘
 
 🚀 PUSH: Complete user story implementation
-
-┌─────────────────────────────────────────────────────────────────────────────────────┐
-│                                   SUMMARY                                           │
-│                                                                                     │
-│ ✅ User Story: COMPLETE                                                             │
-│ ✅ Acceptance Test: GREEN (behaviour implemented)                                   │
-│ ✅ Unit Tests: GREEN (domain logic tested)                                         │
-│ ✅ Integration Tests: GREEN (adapters tested)                                      │
-│ ✅ Contract Tests: GREEN (API contracts verified)                                  │
-│ ✅ E2E Tests: GREEN (full journey works)                                           │
-│                                                                                     │
-│ 🏗️  Architecture: Clean separation maintained                                      │
-│ 📐 Dependencies: Flow respected (External → Adapter → Use Case → Domain)           │
-│ 🧪 Coverage: All layers tested appropriately                                       │
-│ 🔄 Process: TDD cycle followed throughout                                          │
-└─────────────────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                                   SUMMARY                                       │
+│                                                                                 │
+│ User Story: COMPLETE                                                            │
+│ Acceptance Test: GREEN (behaviour implemented)                                  │
+│ Unit Tests: GREEN (domain logic tested)                                         │
+│ Integration Tests: GREEN (adapters tested)                                      │
+│ Contract Tests: GREEN (API contracts verified)                                  │
+│ E2E Tests: GREEN (full journey works)                                           │
+│                                                                                 │
+│ Architecture: Clean separation maintained                                       │
+│ Dependencies: Flow respected (External → Adapter → Use Case → Domain)           │
+│ Coverage: All layers tested appropriately                                       │
+│ Process: TDD cycle followed throughout                                          │
+└─────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 #### Key Testing Principles in the Flow
@@ -2007,29 +2004,212 @@ STEP 6: END-TO-END TESTS (OPTIONAL)
 - **Contract Testing**: Ensure all adapter implementations satisfy their port contracts
 - **Use Case Testing**: Test each use case independently with mocked dependencies
 
-### Domain Layer Testing
+### Test Boundaries and Responsibilities
 
-- **Unit Tests**: Test domain objects (entities, value objects, aggregates) in isolation
-- **Domain Service Tests**: Test business logic that spans multiple domain objects
-- **Invariant Tests**: Verify business rules and constraints are enforced
+```txt
+                        TEST BOUNDARIES AND REPONSABILITIES
+    ┌─────────────────────────────────────────────────────────────────────────┐
+    │                           E2E TESTS                                     │
+    │  Boundary: HTTP → Database                                              │
+    │  Responsibility: User journey validation                                │
+    │  Mocks: Nothing (real HTTP server, real database)                       │
+    │  Purpose: Verify complete system behavior                               │
+    └─────────────────────────────────────────────────────────────────────────┘
+    ┌─────────────────────────────────────────────────────────────────────────┐
+    │                       CONTRACT TESTS                                    │
+    │  Boundary: HTTP → Use Case                                              │
+    │  Responsibility: API contract validation                                │
+    │  Mocks: Nothing (real HTTP server, real database)                       │
+    │  Purpose: Verify driving adapter behavior and contracts                 │
+    └─────────────────────────────────────────────────────────────────────────┘
+    ┌─────────────────────────────────────────────────────────────────────────┐
+    │                      ACCEPTANCE TESTS                                   │
+    │  Boundary: Controller → Domain OR Use Case → Domain                     │
+    │  Responsibility: Whole Feature behavior validation                      │
+    │  Mocks: Infrastructure (repositories, external services)                │
+    │  Purpose: Define and verify business requirements                       │
+    └─────────────────────────────────────────────────────────────────────────┘
+    ┌─────────────────────────────────────────────────────────────────────────┐
+    │                      INTEGRATION TESTS                                  │
+    │  Boundary: Adapter → External System                                    │
+    │  Responsibility: External system integration validation                 │
+    │  Mocks: Nothing in boundary (real databases, real APIs)                 │
+    │  Purpose: Verify driven adapter implementations                         │
+    └─────────────────────────────────────────────────────────────────────────┘
+    ┌─────────────────────────────────────────────────────────────────────────┐
+    │                         UNIT TESTS                                      │
+    │  Boundary: Single class/module                                          │
+    │  Responsibility: Feature units validation                               │
+    │  Mocks: Dependencies (ports, other domain objects if needed)            │
+    │  Purpose: Verify domain behavior and use case orchestration             │
+    └─────────────────────────────────────────────────────────────────────────┘
+```
 
-### Application Layer Testing
+#### Unit Tests
 
-- **Use Case Tests**: Test orchestration logic with mocked ports
-- **Command/Query Tests**: Validate input processing and response formatting
-- **Event Integration Tests**: Verify event publishing and handling
+**Boundary**: Single class or module
+**What it tests**: Pure business logic and behavior
+**What it mocks**: Dependencies (ports, complex collaborators)
+**What it uses real**: Value objects, simple domain objects
+**Responsibility**:
 
-### Infrastructure Layer Testing
+- Domain object behavior (entities, value objects, aggregates)
+- Use case orchestration logic
+- Business rule enforcement
+- Domain event emission
 
-- **Adapter Tests**: Test each adapter implementation independently
-- **Contract Tests**: Ensure all implementations satisfy their port contracts
-- **Integration Tests**: Test adapters with real external systems
+```typescript
+// Domain Unit Test
+test("User aggregate enforces email uniqueness") {
+  const existingEmail = new Email("existing@example.com")
+  const user = User.create(userId, existingEmail)
 
-### End-to-End Testing
+  expect(() => user.changeEmail(existingEmail))
+    .toThrow(EmailAlreadyInUse)
+}
 
-- **Full Workflow Tests**: Test complete user journeys through all layers
-- **In-Memory Tests**: Use in-memory adapters for fast, deterministic tests
-- **System Tests**: Validate the entire system with production-like configuration
+// Use Case Unit Test
+test("RegisterUser orchestrates domain and infrastructure") {
+  const mockRepo = mock(UserRepository)
+  const mockEvents = mock(EventPublisher)
+  const useCase = new RegisterUser(mockRepo, mockEvents)
+
+  await useCase.execute({ email: "user@example.com" })
+
+  verify(mockRepo.save).calledWith(instanceOf(User))
+  verify(mockEvents.publish).calledWith(instanceOf(UserRegistered))
+}
+```
+
+#### Integration Tests
+
+**Boundary**: Adapter to external system
+**What it tests**: Data transformation and external system interaction
+**What it mocks**: Nothing within the boundary
+**What it uses real**: Database, external APIs, file system
+**Responsibility**:
+
+- Database schema mapping
+- External API communication
+- Error handling with real systems
+- Transaction management
+
+```typescript
+test("PostgresUserRepository saves and retrieves users correctly") {
+  const repo = new PostgresUserRepository(realTestDatabase)
+  const user = UserMother.withEmail("test@example.com")
+
+  await repo.save(user)
+  const retrieved = await repo.findById(user.id)
+
+  expect(retrieved.email.value).toBe("test@example.com")
+  expect(retrieved.id.equals(user.id)).toBe(true)
+}
+```
+
+#### Acceptance Tests
+
+**Boundary**: Controller to domain OR Use case to domain
+**What it tests**: Complete feature behavior
+**What it mocks**: Infrastructure concerns (repositories, external services)
+**What it uses real**: Domain objects, use cases, controllers
+**Responsibility**:
+
+- Feature completeness
+- Business requirement satisfaction
+- User story validation
+- Cross-cutting concerns
+
+```typescript
+test("User can register with valid email") {
+  const mockRepo = mock(UserRepository)
+  const mockEvents = mock(EventPublisher)
+  const useCase = new RegisterUser(mockRepo, mockEvents)
+
+  const result = await useCase.execute({
+    email: "user@example.com"
+  })
+
+  expect(result.success).toBe(true)
+  expect(result.userId).toBeDefined()
+  verify(mockRepo.save).calledWith(instanceOf(User))
+}
+```
+
+#### Contract Tests
+
+**Boundary**: HTTP to use case
+**What it tests**: API contracts and transport concerns
+**What it mocks**: Use cases and below
+**What it uses real**: HTTP layer, serialization, validation
+**Responsibility**:
+
+- HTTP status codes
+- Request/response format
+- Input validation
+- Error response format
+- Authentication/authorization
+
+```typescript
+test("POST /users returns 201 with valid user data") {
+  const mockUseCase = mock(RegisterUser)
+  when(mockUseCase.execute).thenReturn({
+    success: true,
+    userId: "uuid-123"
+  })
+
+  const response = await request(app)
+    .post('/users')
+    .send({ email: 'test@example.com' })
+
+  expect(response.status).toBe(201)
+  expect(response.body.id).toBe("uuid-123")
+  verify(mockUseCase.execute).calledWith({ email: 'test@example.com' })
+}
+```
+
+#### End-to-End Tests
+
+**Boundary**: HTTP to database
+**What it tests**: Complete user journeys
+**What it mocks**: Nothing (full system)
+**What it uses real**: Everything (HTTP server, database, external services)
+**Responsibility**:
+
+- User workflow validation
+- System integration verification
+- Performance under realistic conditions
+- Configuration validation
+
+```typescript
+test("Complete user registration journey") {
+  // Real HTTP call to real server with real database
+  const response = await fetch('http://localhost:3000/users', {
+    method: 'POST',
+    body: JSON.stringify({ email: 'test@example.com' }),
+    headers: { 'Content-Type': 'application/json' }
+  })
+
+  expect(response.status).toBe(201)
+
+  // Verify in real database
+  const savedUser = await testDatabase.query(
+    'SELECT * FROM users WHERE email = $1',
+    ['test@example.com']
+  )
+  expect(savedUser.rows).toHaveLength(1)
+}
+```
+
+### Key Principles
+
+1. **Test Pyramid**: More unit tests, fewer E2E tests
+2. **Boundary Clarity**: Each test type has a clear scope
+3. **Mock Strategy**: Mock external dependencies, use real domain objects
+4. **Fast Feedback**: Unit and acceptance tests should be fast
+5. **Realistic Validation**: Integration and E2E tests use real systems
+6. **Contract Verification**: Contract tests ensure API consistency
+7. **Responsibility Separation**: Each test type validates different concerns
 
 ## Project Structure
 
