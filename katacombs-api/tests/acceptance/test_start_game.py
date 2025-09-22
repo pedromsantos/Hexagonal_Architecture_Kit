@@ -4,7 +4,8 @@ from src.katacombs.infrastructure.adapters.fastapi_app import create_app
 
 
 class TestStartGameAcceptance:
-    """ACCEPTANCE TEST: Full Business Flow - "As a player, I want to start a new game so that I can begin playing Katacombs"
+    """ACCEPTANCE TEST: Full Business Flow
+    "As a player, I want to start a new game so that I can begin playing Katacombs"
 
     This test covers the complete business flow:
     1. Player creates a new game (POST /game/player)
@@ -27,7 +28,7 @@ class TestStartGameAcceptance:
         start_game_response = client.post(
             "/game/player",
             json={"name": "Pedro", "sid": "123456-123456789012-12345678"},
-            headers={"Content-Type": "application/json"}
+            headers={"Content-Type": "application/json"},
         )
 
         # Verify game creation

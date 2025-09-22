@@ -20,8 +20,7 @@ class TestStartGameUseCase:
 
         # Use REAL domain entity - never mock domain objects
         real_starting_location = Location(
-            sid=Sid.generate(),
-            description="Starting location for the game"
+            sid=Sid.generate(), description="Starting location for the game"
         )
         mock_location_repo.find_starting_location.return_value = real_starting_location
 

@@ -1,4 +1,3 @@
-
 from src.katacombs.domain.entities.item import Item
 from src.katacombs.domain.entities.location import Location
 from src.katacombs.domain.value_objects import Action, Direction, Sid

@@ -10,27 +10,10 @@ class Item:
     description: str
     available_actions: list[Action] = field(default_factory=list)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if not self.name.strip():
-            raise ValueError("Item name cannot be empty")
+            msg = "Item name cannot be empty"
+            raise ValueError(msg)
         if not self.description.strip():
-            raise ValueError("Item description cannot be empty")
-
-    def can_perform_action(self, action: Action) -> bool:
-        return action in self.available_actions
-
-    def add_action(self, action: Action) -> None:
-        if action not in self.available_actions:
-            self.available_actions.append(action)
-
-    def remove_action(self, action: Action) -> None:
-        if action in self.available_actions:
-            self.available_actions.remove(action)
-
-    def __eq__(self, other) -> bool:
-        if not isinstance(other, Item):
-            return False
-        return self.sid == other.sid
-
-    def __hash__(self) -> int:
-        return hash(self.sid)
+            msg = "Item description cannot be empty"
+            raise ValueError(msg)

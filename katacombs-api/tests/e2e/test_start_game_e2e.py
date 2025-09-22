@@ -18,7 +18,7 @@ class TestStartGameE2E:
         response = client.post(
             "/game/player",
             json={"name": "Pedro", "sid": "123456-123456789012-12345678"},
-            headers={"Content-Type": "application/json"}
+            headers={"Content-Type": "application/json"},
         )
 
         # Assert - Verify complete system behavior
@@ -55,8 +55,12 @@ class TestStartGameE2E:
         client = TestClient(app)
 
         # Act - Create two different players (each with unique SID from external system)
-        response1 = client.post("/game/player", json={"name": "Alice", "sid": "111111-111111111111-11111111"})
-        response2 = client.post("/game/player", json={"name": "Bob", "sid": "222222-222222222222-22222222"})
+        response1 = client.post(
+            "/game/player", json={"name": "Alice", "sid": "111111-111111111111-11111111"}
+        )
+        response2 = client.post(
+            "/game/player", json={"name": "Bob", "sid": "222222-222222222222-22222222"}
+        )
 
         # Assert - Both players created successfully with different SIDs
         assert response1.status_code == 201
@@ -82,7 +86,7 @@ class TestStartGameE2E:
         response = client.post(
             "/game/player",
             json={"name": "", "sid": "123456-123456789012-12345678"},
-            headers={"Content-Type": "application/json"}
+            headers={"Content-Type": "application/json"},
         )
 
         # Assert - Error handled properly through entire stack

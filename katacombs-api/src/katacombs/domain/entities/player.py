@@ -10,6 +10,7 @@ class Player:
     """Player Aggregate Root
     Represents a player in the Katacombs game
     """
+
     sid: Sid
     name: str
     location: Location
@@ -20,15 +21,10 @@ class Player:
     def create(cls, sid: Sid, name: str, location: Location, bag: Bag) -> "Player":
         """Factory method for creating a new Player"""
         if not name.strip():
-            raise ValueError("Player name cannot be empty")
+            msg = "Player name cannot be empty"
+            raise ValueError(msg)
 
-        return cls(
-            sid=sid,
-            name=name.strip(),
-            location=location,
-            bag=bag,
-            is_active=True
-        )
+        return cls(sid=sid, name=name.strip(), location=location, bag=bag, is_active=True)
 
     def move_to_location(self, new_location: Location) -> None:
         """Move player to a new location"""
@@ -38,7 +34,7 @@ class Player:
         """Mark player as inactive (quit the game)"""
         self.is_active = False
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, Player):
             return False
         return self.sid == other.sid

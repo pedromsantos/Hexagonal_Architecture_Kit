@@ -1,4 +1,3 @@
-
 from src.katacombs.domain.entities.bag import Bag
 from src.katacombs.domain.entities.location import Location
 from src.katacombs.domain.entities.player import Player

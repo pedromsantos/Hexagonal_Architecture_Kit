@@ -1,4 +1,3 @@
-
 from ...domain.entities.player import Player
 from ...domain.repositories.player_repository import PlayerRepository
 from ...domain.value_objects import Sid
@@ -10,7 +9,8 @@ class InMemoryPlayerRepository(PlayerRepository):
     Implements the domain port interface
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
+        super().__init__()
         self._players: dict[Sid, Player] = {}
 
     def save(self, player: Player) -> None:

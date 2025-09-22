@@ -16,4 +16,5 @@ class Action(Enum):
         for a in cls:
             if a.value == action.lower():
                 return a
-        raise ValueError(f"Invalid action: {action}")
+        msg = f"Invalid action: {action}"
+        raise ValueError(msg)

@@ -1,4 +1,3 @@
-
 from ...domain.entities.item import Item
 from ...domain.entities.location import Location
 from ...domain.repositories.location_repository import LocationRepository
@@ -10,19 +9,20 @@ class InMemoryLocationRepository(LocationRepository):
     Handles location persistence and provides a starting location
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
+        super().__init__()
         self._locations: dict[Sid, Location] = {}
         self._initialize_starting_location()
 
-    def _initialize_starting_location(self):
+    def _initialize_starting_location(self) -> None:
         """Create the default starting location for the game"""
         starting_sid = Sid.generate()
-        starting_location = Location(
-            sid=starting_sid,
-            description="You are in the entrance hall of the ancient Katacombs. "
-                       "Torches flicker on the stone walls, casting dancing shadows. "
-                       "You can feel a cool breeze coming from deeper in the tunnels."
+        description = (
+            "You are in the entrance hall of the ancient Katacombs. "
+            "Torches flicker on the stone walls, casting dancing shadows. "
+            "You can feel a cool breeze coming from deeper in the tunnels."
         )
+        starting_location = Location(sid=starting_sid, description=description)
 
         # Add some basic exits
         starting_location.add_exit(Direction.NORTH, Sid.generate())
@@ -33,7 +33,7 @@ class InMemoryLocationRepository(LocationRepository):
             sid=Sid.generate(),
             name="Torch",
             description="A flickering torch that provides light in the darkness",
-            available_actions=[Action.PICK, Action.USE]
+            available_actions=[Action.PICK, Action.USE],
         )
         starting_location.add_item(torch)
 

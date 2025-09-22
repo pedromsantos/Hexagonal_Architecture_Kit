@@ -22,7 +22,7 @@ class TestGameControllerContract:
         response = client.post(
             "/game/player",
             json={"name": "Pedro", "sid": "123456-123456789012-12345678"},
-            headers={"Content-Type": "application/json"}
+            headers={"Content-Type": "application/json"},
         )
 
         # Assert - Verify contract compliance
@@ -31,7 +31,8 @@ class TestGameControllerContract:
 
         response_data = response.json()
         assert "sid" in response_data
-        assert response_data["sid"] == "123456-123456789012-12345678"  # Should preserve provided SID
+        # Should preserve provided SID
+        assert response_data["sid"] == "123456-123456789012-12345678"
         assert response_data["name"] == "Pedro"
         assert "location" in response_data
         assert "bag" in response_data
@@ -55,7 +56,7 @@ class TestGameControllerContract:
         response = client.post(
             "/game/player",
             json={"name": "", "sid": "123456-123456789012-12345678"},
-            headers={"Content-Type": "application/json"}
+            headers={"Content-Type": "application/json"},
         )
 
         # Assert
@@ -71,7 +72,7 @@ class TestGameControllerContract:
         response = client.post(
             "/game/player",
             json={"sid": "123456-123456789012-12345678"},
-            headers={"Content-Type": "application/json"}
+            headers={"Content-Type": "application/json"},
         )
 
         # Assert - FastAPI validation should return 422
@@ -85,9 +86,7 @@ class TestGameControllerContract:
 
         # Act - Send request without sid field (but with name)
         response = client.post(
-            "/game/player",
-            json={"name": "Pedro"},
-            headers={"Content-Type": "application/json"}
+            "/game/player", json={"name": "Pedro"}, headers={"Content-Type": "application/json"}
         )
 
         # Assert - FastAPI validation should return 422 for missing required field
@@ -103,7 +102,7 @@ class TestGameControllerContract:
         response = client.post(
             "/game/player",
             json={"name": "Pedro", "sid": "invalid-sid-format"},
-            headers={"Content-Type": "application/json"}
+            headers={"Content-Type": "application/json"},
         )
 
         # Assert - Should return 400 for invalid SID format (domain validation)
@@ -117,9 +116,7 @@ class TestGameControllerContract:
 
         # Act - Send completely empty request
         response = client.post(
-            "/game/player",
-            json={},
-            headers={"Content-Type": "application/json"}
+            "/game/player", json={}, headers={"Content-Type": "application/json"}
         )
 
         # Assert - FastAPI validation should return 422 for missing required fields

@@ -4,15 +4,12 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = [
-    "fastapi>=0.117.1",
-    "pydantic>=2.11.9",
-    "uvicorn>=0.36.0",
-]
+dependencies = ["fastapi>=0.117.1", "pydantic>=2.11.9", "uvicorn>=0.36.0"]
 
 [dependency-groups]
 dev = [
     "httpx>=0.28.1",
+    "pylance>=0.36.0",
     "pyright>=1.1.405",
     "pytest>=8.4.2",
     "pytest-asyncio>=1.2.0",
@@ -34,15 +31,15 @@ extend-exclude = ["migrations", ".venv", "__pycache__"]
 select = ["ALL"]
 ignore = [
     # Docstrings - ignore all docstring requirements
-    "D",       # All pydocstyle rules (docstring requirements)
+    "D", # All pydocstyle rules (docstring requirements)
 
     # Formatter conflicts
-    "COM812",  # Trailing comma missing (conflicts with formatter)
-    "ISC001",  # Implicitly concatenated string literals (conflicts with formatter)
+    "COM812", # Trailing comma missing (conflicts with formatter)
+    "ISC001", # Implicitly concatenated string literals (conflicts with formatter)
 
     # Architecture choices
-    "TID252",  # Prefer absolute imports (we use relative imports in our architecture)
-    "INP001",  # Implicit namespace package (acceptable for our structure)
+    "TID252", # Prefer absolute imports (we use relative imports in our architecture)
+    "INP001", # Implicit namespace package (acceptable for our structure)
 ]
 [tool.ruff.lint.mccabe]
 # Maximum complexity for functions
@@ -99,7 +96,7 @@ reportIncompatibleMethodOverride = "error"
 reportIncompatibleVariableOverride = "error"
 reportInconsistentConstructor = "error"
 reportOverlappingOverloads = "error"
-reportMissingSuperCall = "false"  # Not always needed
+reportMissingSuperCall = "information"            # Not always needed
 reportUninitializedInstanceVariable = "error"
 reportInvalidStringEscapeSequence = "error"
 reportUnknownParameterType = "error"
@@ -116,13 +113,13 @@ reportUnnecessaryCast = "error"
 reportUnnecessaryComparison = "error"
 reportAssertAlwaysTrue = "error"
 reportSelfClsParameterName = "error"
-reportImplicitStringConcatenation = "false"  # Allow for readability
+reportImplicitStringConcatenation = "information" # Allow for readability
 reportUndefinedVariable = "error"
 reportUnboundVariable = "error"
 reportInvalidStubStatement = "error"
 reportIncompleteStub = "error"
 reportUnsupportedDunderAll = "error"
-reportUnusedCallResult = "false"  # Sometimes we don't need the result
+reportUnusedCallResult = "information"            # Sometimes we don't need the result
 reportUnusedCoroutine = "error"
 reportUnnecessaryTypeIgnoreComment = "error"
 reportMatchNotExhaustive = "error"

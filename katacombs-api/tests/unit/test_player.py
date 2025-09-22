@@ -15,10 +15,7 @@ class TestPlayer:
         # Arrange
         player_sid = Sid.generate()
         name = "Pedro"
-        location = Location(
-            sid=Sid.generate(),
-            description="Starting room"
-        )
+        location = Location(sid=Sid.generate(), description="Starting room")
         bag = Bag()
 
         # Act
@@ -56,12 +53,7 @@ class TestPlayer:
 
     def test_player_can_quit_game(self):
         # Arrange
-        player = Player.create(
-            Sid.generate(),
-            "Pedro",
-            Location(Sid.generate(), "Room"),
-            Bag()
-        )
+        player = Player.create(Sid.generate(), "Pedro", Location(Sid.generate(), "Room"), Bag())
 
         # Act
         player.quit_game()

@@ -17,7 +17,8 @@ class Direction(Enum):
         for d in cls:
             if d.value == direction.lower():
                 return d
-        raise ValueError(f"Invalid direction: {direction}")
+        msg = f"Invalid direction: {direction}"
+        raise ValueError(msg)
 
     def opposite(self) -> "Direction":
         opposites = {

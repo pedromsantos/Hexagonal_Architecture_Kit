@@ -1,0 +1,74 @@
+{
+    "include": [
+        "src",
+        "tests"
+    ],
+    "exclude": [
+        "**/__pycache__",
+        "**/*.pyc",
+        "build",
+        "dist",
+        ".venv/lib",
+        ".venv/bin"
+    ],
+    "venvPath": ".",
+    "venv": ".venv",
+    "extraPaths": [
+        "./src"
+    ],
+    "pythonVersion": "3.12",
+    "pythonPlatform": "Darwin",
+    "executionEnvironments": [
+        {
+            "root": ".",
+            "pythonVersion": "3.12",
+            "pythonPlatform": "Darwin",
+            "extraPaths": [
+                "./src"
+            ]
+        }
+    ],
+    "typeCheckingMode": "strict",
+    "reportMissingImports": "error",
+    "reportMissingTypeStubs": "warning",
+    "reportImportCycles": "error",
+    "reportUnusedImport": "warning",
+    "reportUnusedClass": "warning",
+    "reportUnusedFunction": "warning",
+    "reportUnusedVariable": "warning",
+    "reportDuplicateImport": "error",
+    "reportOptionalSubscript": "error",
+    "reportOptionalMemberAccess": "error",
+    "reportOptionalCall": "error",
+    "reportOptionalIterable": "error",
+    "reportOptionalContextManager": "error",
+    "reportOptionalOperand": "error",
+    "reportUntypedFunctionDecorator": "warning",
+    "reportUntypedClassDecorator": "warning",
+    "reportUntypedBaseClass": "warning",
+    "reportUntypedNamedTuple": "warning",
+    "reportPrivateUsage": "warning",
+    "reportConstantRedefinition": "error",
+    "reportIncompatibleMethodOverride": "error",
+    "reportIncompatibleVariableOverride": "error",
+    "reportInconsistentConstructor": "error",
+    "reportOverlappingOverloads": "error",
+    "reportMissingSuperCall": "warning",
+    "reportUninitializedInstanceVariable": "warning",
+    "reportInvalidStringEscapeSequence": "error",
+    "reportUnknownParameterType": "warning",
+    "reportUnknownArgumentType": "warning",
+    "reportUnknownLambdaType": "warning",
+    "reportUnknownVariableType": "warning",
+    "reportUnknownMemberType": "warning",
+    "reportMissingParameterType": "warning",
+    "reportMissingTypeArgument": "warning",
+    "reportInvalidTypeVarUse": "error",
+    "reportCallInDefaultInitializer": "warning",
+    "reportUnnecessaryIsInstance": "warning",
+    "reportUnnecessaryCast": "warning",
+    "reportUnnecessaryComparison": "warning",
+    "reportAssertAlwaysTrue": "warning",
+    "reportSelfClsParameterName": "warning",
+    "reportImplicitStringConcatenation": "warning"
+}
