@@ -1,4 +1,4 @@
-# Domain Driven Design with Ports & Adapters Rules
+# Domain Driven Design with Ports & Adapters and CQRS Rules
 
 ## TL;DR: How to: DDD and Ports & Adapters Work Together
 
