@@ -2397,17 +2397,17 @@ CQRS does not mean that eventual consistency is requiered. This is only required
             │                                                    │
             │ Goes THROUGH Domain                                │ BYPASSES Domain
             ▼                                                    ▼
-    ┌───────────────────────────┐                     ┌─────────────────┐
-    │           DOMAIN LAYER    │                     │   Read Model    │
-    │  ┌─────────────────┐      │                     │  (Projections)  │
-    │  │   Aggregates    │      │                     │                 │
-    │  │   Entities      │      │                     │  Optimized for  │
-    │  │   Value Objects │      │                     │  UI needs       │
-    │  │   Domain Events │      │                     │                 │
-    │  └─────────────────┘      │                     └─────────────────┘
-    └───────────────────────────┘                              │
-                    │                                          │
-                    │ Persists to                              │ Reads from
+    ┌────────────────────────┐                        ┌─────────────────┐
+    │     DOMAIN LAYER       │                        │   Read Model    │
+    │  ┌─────────────────┐   │                        │  (Projections)  │
+    │  │   Aggregates    │   │                        │                 │
+    │  │   Entities      │   │                        │  Optimized for  │
+    │  │   Value Objects │   │                        │  UI needs       │
+    │  │   Domain Events │   │                        │                 │
+    │  └─────────────────┘   │                        └─────────────────┘
+    └────────────────────────┘                                 │
+                    │                                          │ Reads from
+                    │ Persists to                              │
                     ▼                                          ▼
     ┌─────────────────┐                               ┌─────────────────┐
     │   Write Model   │ ────── Events ──────────────► │   Read Model    │
