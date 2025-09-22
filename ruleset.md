@@ -1,5 +1,91 @@
 # Domain Driven Design with Ports & Adapters Rules
 
+## TL;DR: How DDD and Ports & Adapters Work Together
+
+This document defines two complementary architectural approaches that work together to create maintainable, testable applications:
+
+### The Integration Pattern
+
+**Core Domain Model** (Rules 1-14) focuses on business logic and domain concepts:
+
+- **Entities** (Rule 1) contain business behavior and have unique identity
+- **Value Objects** (Rule 2) represent immutable domain concepts
+- **Aggregates** (Rule 3) enforce business invariants and transaction boundaries
+- **Domain Services** (Rule 4) handle business logic spanning multiple entities
+- **Use Cases** (Rule 9) orchestrate domain objects without containing business logic
+
+**Ports & Adapters** (Rules 1-12) focuses on architectural boundaries and external concerns:
+
+- **Primary Ports** define what your application can do (use case interfaces)
+- **Secondary Ports** define what your application needs (repositories, external services)
+- **Primary Adapters** translate external requests into domain operations (REST controllers, CLI)
+- **Secondary Adapters** implement external integrations (databases, APIs, file systems)
+
+### How They Connect in Practice
+
+```python
+# 1. Domain Layer (DDD Core)
+class User(Entity):                    # Rule 1: Entity with identity
+    def change_email(self, email: Email) -> UserEmailChanged:
+        # Business logic here
+        return UserEmailChanged(self.id, self.email, email)
+
+class UserRepository(ABC):             # Rule 5: Domain port for persistence
+    def save(self, user: User) -> None: pass
+
+# 2. Application Layer (Bridge between DDD and Ports & Adapters)
+class ChangeUserEmailUseCase(ChangeUserEmailPort):  # Rule 9 + P&A Rule 1
+    def __init__(self,
+                 user_repo: UserRepository,           # Domain port
+                 email_service: EmailNotificationPort, # Infrastructure port
+                 time_provider: TimeProviderPort):     # Infrastructure port
+        self._user_repo = user_repo
+        self._email_service = email_service
+        self._time_provider = time_provider
+
+    def execute(self, command: ChangeEmailCommand) -> None:
+        # Orchestrate domain objects (Rule 9)
+        user = self._user_repo.find_by_id(command.user_id)
+        event = user.change_email(Email(command.new_email))
+
+        # Use infrastructure ports for side effects
+        self._user_repo.save(user)
+        self._email_service.send_email_change_notification(
+            event.old_email, event.new_email, self._time_provider.now()
+        )
+
+# 3. Infrastructure Layer (Ports & Adapters Implementation)
+class SqlUserRepository(UserRepository):      # P&A Rule 3: Secondary adapter
+    def save(self, user: User) -> None:
+        # Handle ORM mapping, database specifics
+
+class RestUserController:                     # P&A Rule 2: Primary adapter
+    def patch_user_email(self, user_id: str, request: ChangeEmailRequest):
+        command = ChangeEmailCommand(user_id, request.email)
+        self._use_case.execute(command)        # Delegate to use case
+```
+
+### Key Integration Principles
+
+1. **Domain Objects** (Entities, Value Objects, Aggregates) contain business logic and know nothing about persistence or external systems
+
+2. **Use Cases** orchestrate domain objects and coordinate with external systems through **Secondary Ports**
+
+3. **Primary Adapters** translate external requests into domain commands and delegate to **Use Cases** through **Primary Ports**
+
+4. **Secondary Adapters** implement **Secondary Ports** and handle all external system complexity (databases, APIs, file systems, etc.)
+
+5. **Dependency Flow**: External → Primary Adapter → Use Case → Domain Objects → Secondary Ports → Secondary Adapters
+
+This creates a clean separation where:
+
+- **Business logic** lives in domain objects (DDD)
+- **Orchestration** lives in use cases (DDD + P&A bridge)
+- **External concerns** are isolated in adapters (P&A)
+- **Interfaces** define clear contracts between layers (P&A)
+
+---
+
 ## Core Domain Model Rules
 
 ### 1. Entity Rules
