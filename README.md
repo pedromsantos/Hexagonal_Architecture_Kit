@@ -6,7 +6,7 @@ This document defines three complementary approaches that work together to creat
 
 - Domain Driven Design (DDD)
 - Hexagonal Architecture or Ports & Adapters Architecture.
-- Command Query Responsability Segregations (CQRS) (TBD)
+- Command Query Responsability Segregations (CQRS)
 
 Note: I used an LLM to convert the examples from Python to other languages, some of them I don't know well enough to judge on the quality of the examples.
 
@@ -2363,6 +2363,196 @@ Each use case in its own folder with kebab-case naming:
 
 This unified ruleset ensures consistent implementation of Domain Driven Design with Ports & Adapters architecture across all supported programming languages, providing clean separation of concerns, testability, and flexibility while maintaining domain focus and proper dependency management.
 
+## CQRS - Command Query Responsibility Segregation
+
+### What is CQRS?
+
+- **CQRS = Command Query Responsibility Segregation**
+- CQRS separates your application operations into two distinct models:
+  - **Commands**: Change state (writes) - e.g., `TransferMoneyCommand`, `RegisterUserCommand`
+  - **Queries**: Read state (reads) - e.g., `GetAccountBalanceQuery`, `FindUserByEmailQuery`
+
+### The Key Insight: Different Paths for Reads and Writes
+
+```txt
+                     HEXAGONAL ARCHITECTURE + CQRS
+
+    ┌─────────────────┐                               ┌─────────────────┐
+    │   HTTP Client   │                               │   HTTP Client   │
+    │  (POST/PUT)     │                               │     (GET)       │
+    └─────────────────┘                               └─────────────────┘
+            │                                                    │
+            │ Commands (Writes)                                  │ Queries (Reads)
+            ▼                                                    ▼
+    ┌─────────────────┐                               ┌─────────────────┐
+    │ Command Handler │                               │  Query Handler  │
+    │   (Use Case)    │                               │   (Direct DB)   │
+    └─────────────────┘                               └─────────────────┘
+            │                                                    │
+            │ Goes THROUGH Domain                                │ BYPASSES Domain
+            ▼                                                    ▼
+    ┌───────────────────────────┐                     ┌─────────────────┐
+    │           DOMAIN LAYER    │                     │   Read Model    │
+    │  ┌─────────────────┐      │                     │  (Projections)  │
+    │  │   Aggregates    │      │                     │                 │
+    │  │   Entities      │      │                     │  Optimized for  │
+    │  │   Value Objects │      │                     │  UI needs       │
+    │  │   Domain Events │      │                     │                 │
+    │  └─────────────────┘      │                     └─────────────────┘
+    └───────────────────────────┘                              │
+                    │                                          │
+                    │ Persists to                              │ Reads from
+                    ▼                                          ▼
+    ┌─────────────────┐                               ┌─────────────────┐
+    │   Write Model   │ ────── Events ──────────────► │   Read Model    │
+    │   Database      │    Sync or just write to      │   Database      │
+    └─────────────────┘    table and read from view   └─────────────────┘
+```
+
+### How CQRS Works with Hexagonal Architecture
+
+#### Commands (Writes) - Through the Domain
+
+- **Path**: HTTP → Driving Adapter → Command Use Case → Domain → Repository → Write DB
+- **Purpose**: Ensure business rules and invariants are enforced
+- **Example**: Registering a user must validate email uniqueness and create domain events
+
+```typescript
+// Command side - goes through domain
+class RegisterUserUseCase {
+  async execute(command: RegisterUserCommand) {
+    // Business logic through domain
+    const email = new Email(command.email);
+    const user = User.create(email, command.name); // Domain validation
+    await this.userRepository.save(user); // Write model
+    await this.eventPublisher.publish(new UserRegistered(user.id));
+  }
+}
+```
+
+#### Queries (Reads) - Around the Domain
+
+- **Path**: HTTP → Driving Adapter → Query Handler → Repository → DTO
+- **Purpose**: Optimized data retrieval without domain overhead
+- **Example**: Getting user list for admin dashboard with pagination and filtering
+
+```typescript
+// Query side - bypasses domain (but still uses repository adapter)
+class GetUsersQuery {
+  constructor(private readonly userProjectionRepository: UserProjectionRepository) {}
+
+  async execute(query: GetUsersQuery): Promise<UserListDto[]> {
+    // Goes through repository but bypasses domain objects
+    return await this.userProjectionRepository.findUsersByStatus(
+      query.status,
+      query.limit,
+      query.offset
+    );
+  }
+}
+
+// Read-side repository - optimized for queries, no domain objects
+class UserProjectionRepository {
+  async findUsersByStatus(status: string, limit: number, offset: number): Promise<UserListDto[]> {
+    return await this.readDatabase.query(
+      `
+      SELECT id, email, name, created_at, status
+      FROM user_projections
+      WHERE status = $1
+      ORDER BY created_at DESC
+      LIMIT $2 OFFSET $3
+    `,
+      [status, limit, offset]
+    );
+  }
+}
+```
+
+### Key Benefits
+
+#### 1. **Separation of Concerns**
+
+- **Writes**: Complex business logic, validation, invariants
+- **Reads**: Simple data retrieval, formatting, performance optimization
+
+#### 2. **No More Bloated Entities**
+
+- Entities don't need getters for every possible UI scenario
+- Domain objects focused purely on business behavior
+- Read models shaped exactly for UI needs
+
+#### 3. **Independent Optimization**
+
+- **Write Side**: Optimized for business logic integrity
+- **Read Side**: Optimized for query performance, caching, denormalization
+
+#### 4. **Perfect Hexagonal Integration**
+
+- **Commands**: Use hexagonal use cases (domain-driven)
+- **Queries**: Use direct database projections (infrastructure-driven)
+- Same driving adapters handle both, but route differently
+
+### Example: Banking Account
+
+```typescript
+// COMMAND - Transfer Money (through domain)
+class TransferMoneyUseCase {
+  async execute(cmd: TransferMoneyCommand) {
+    const fromAccount = await this.accountRepo.findById(cmd.fromAccountId);
+    const toAccount = await this.accountRepo.findById(cmd.toAccountId);
+
+    // Domain logic and business rules
+    fromAccount.withdraw(cmd.amount); // Validates overdraft limits
+    toAccount.deposit(cmd.amount); // Domain behavior
+
+    await this.accountRepo.save(fromAccount);
+    await this.accountRepo.save(toAccount);
+  }
+}
+
+// QUERY - Get Account Balance (around domain, but through repository adapter)
+class GetAccountBalanceQuery {
+  constructor(private readonly accountProjectionRepository: AccountProjectionRepository) {}
+
+  async execute(query: GetAccountBalanceQuery): Promise<AccountBalanceDto> {
+    // Goes through repository but bypasses domain objects
+    return await this.accountProjectionRepository.getAccountBalance(query.accountId);
+  }
+}
+
+// Read-side repository - optimized for account queries
+class AccountProjectionRepository {
+  async getAccountBalance(accountId: string): Promise<AccountBalanceDto> {
+    return await this.readDatabase.query(
+      `
+      SELECT account_id, balance, currency, last_transaction_date
+      FROM account_balances_view
+      WHERE account_id = $1
+    `,
+      [accountId]
+    );
+  }
+}
+```
+
+### When to Use CQRS
+
+✅ **Use CQRS when:**
+
+- Read and write requirements are very different
+- You need optimized reads (reporting, dashboards, complex queries)
+- You want to avoid polluting domain with read concerns
+- You need independent scaling of reads vs writes
+
+❌ **Don't use CQRS when:**
+
+- Simple CRUD applications
+- Read and write models are very similar
+- Team lacks experience with eventual consistency
+- Over-engineering for simple scenarios
+
+CQRS perfectly complements Hexagonal Architecture by providing clear boundaries between business logic (commands through domain) and data access (queries around domain).
+
 ## References
 
 The initial ruleset was entirely taken from: <https://github.com/bardiakhosravi/agent-context-kit/tree/main>
@@ -2370,3 +2560,5 @@ The initial ruleset was entirely taken from: <https://github.com/bardiakhosravi/
 ### Other sourcees of materials
 
 - Codely: <https://codely.com/en/blog/how-to-implement-ddd-code-using-ai>
+- Los Techies: <https://lostechies.com/jimmybogard/2008/05/21/entities-value-objects-aggregates-and-roots/>
+- Hugo Graça: <https://herbertograca.com/2017/07/03/the-software-architecture-chronicles//>
