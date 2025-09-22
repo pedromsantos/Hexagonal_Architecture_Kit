@@ -10,6 +10,7 @@ from ...infrastructure.repositories.in_memory_location_repository import InMemor
 
 class StartGameRequest(BaseModel):
     name: str
+    sid: str
 
 
 class PlayerResponse(BaseModel):
@@ -51,7 +52,7 @@ def create_app() -> FastAPI:
                 raise HTTPException(status_code=400, detail="Player name cannot be empty")
 
             # Convert HTTP request to domain command
-            command = StartGameCommand(player_name=request.name)
+            command = StartGameCommand(player_name=request.name, player_sid=request.sid)
 
             # Execute use case
             result = use_case.execute(command)

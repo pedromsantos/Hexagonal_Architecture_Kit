@@ -29,8 +29,8 @@ class StartGameUseCase:
             if not starting_location:
                 return StartGameResponse.error_response("No starting location found")
 
-            # Create a new player (domain logic is in the Player.create method)
-            player_sid = Sid.generate()
+            # Create a new player with provided SID (domain logic is in the Player.create method)
+            player_sid = Sid(command.player_sid)  # Validate the provided SID
             empty_bag = Bag()
             player = Player.create(player_sid, command.player_name, starting_location, empty_bag)
 

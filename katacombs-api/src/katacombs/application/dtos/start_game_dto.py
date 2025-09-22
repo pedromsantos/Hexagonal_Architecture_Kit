@@ -8,6 +8,7 @@ from ...domain.entities.player import Player
 class StartGameCommand:
     """Command to start a new game"""
     player_name: str
+    player_sid: str
 
 
 @dataclass
