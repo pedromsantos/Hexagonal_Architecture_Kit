@@ -2438,7 +2438,7 @@ class RegisterUserUseCase {
 
 #### Queries (Reads) - Around the Domain
 
-- **Path**: HTTP → Driving Adapter → Query Handler → Repository → DTO
+- **Path**: HTTP → Driving Adapter → Query Handler → Projection Repository → DTO
 - **Purpose**: Optimized data retrieval without domain overhead
 - **Example**: Getting user list for admin dashboard with pagination and filtering
 
