@@ -447,99 +447,7 @@ class DIContainer:
         )
 ```
 
-## Integrated Project Structure Rules
-
-## Integrated Project Structure Rules
-
-### 14. Hexagonal Package Structure Rules
-- Organize by hexagonal architecture layers with clear port placement
-- **Domain ports**: Repository interfaces and domain service ports in domain layer
-- **Application ports**: Primary ports (use cases) and infrastructure service ports in application layer
-- **Secondary adapters**: Organize by technology for shared infrastructure and easier maintenance
-- **Technology-specific models**: Persistence models live within their respective technology adapters
-- **Configuration layer**: Cross-cutting concerns that wire all layers together
-- Domain and application layers should only depend on their respective port interfaces
-- Infrastructure layer contains all adapter implementations
-
-```
-src/
-├── domain/
-│   ├── model/
-│   │   ├── user/
-│   │   │   ├── user.py              # Entity
-│   │   │   └── email.py             # Value Object
-│   │   └── order/
-│   ├── ports/                       # Domain Ports (Secondary)
-│   │   ├── user_repository.py       # Repository interface (domain concept)
-│   │   ├── order_repository.py
-│   │   ├── pricing_service_port.py  # Domain service interface
-│   │   ├── inventory_service_port.py
-│   │   └── domain_event_store_port.py  # Domain-specific event storage
-│   └── events/                      # Domain Events
-├── application/
-│   ├── ports/
-│   │   ├── primary/                 # Primary Ports (Use Cases)
-│   │   │   ├── create_user_port.py          # Primary Port
-│   │   │   ├── change_user_email_port.py    # Primary Port
-│   │   │   └── deactivate_user_port.py      # Primary Port
-│   │   └── secondary/               # Infrastructure Ports (Secondary)
-│   │       ├── email_notification_port.py   # Infrastructure service
-│   │       ├── event_publisher_port.py      # Infrastructure service
-│   │       └── payment_gateway_port.py      # Infrastructure service
-│   ├── use_cases/
-│   │   ├── create_user_use_case.py          # Use Case (Primary Port Implementation)
-│   │   ├── change_user_email_use_case.py    # Use Case (Primary Port Implementation)
-│   │   └── deactivate_user_use_case.py      # Use Case (Primary Port Implementation)
-│   ├── commands/
-│   ├── queries/
-│   └── handlers/
-├── infrastructure/
-│   └── adapters/
-│       ├── primary/
-│       │   ├── web/
-│       │   │   ├── user_controller.py       # Primary Adapter
-│       │   │   └── order_controller.py
-│       │   ├── cli/
-│       │   └── messaging/
-│       └── secondary/                       # Organized by Technology
-│           ├── sql/
-│           │   ├── models/                          # SQLAlchemy models
-│           │   │   ├── user_model.py
-│           │   │   └── order_model.py
-│           │   ├── base_sql_repository.py          # Shared base class
-│           │   ├── sql_connection_manager.py       # Shared connection handling
-│           │   ├── sql_user_repository.py          # Implements UserRepository
-│           │   ├── sql_order_repository.py         # Implements OrderRepository
-│           │   └── sql_domain_event_store.py       # Implements DomainEventStorePort
-│           ├── mongodb/
-│           │   ├── schemas/                         # MongoDB schemas
-│           │   │   ├── user_schema.py
-│           │   │   └── order_schema.py
-│           │   ├── mongo_connection.py             # Shared connection
-│           │   ├── mongo_user_repository.py        # Implements UserRepository
-│           │   └── mongo_order_repository.py       # Implements OrderRepository
-│           ├── http/
-│           │   ├── base_http_client.py             # Shared HTTP utilities
-│           │   ├── http_retry_policy.py            # Shared retry logic
-│           │   ├── http_pricing_service.py         # Implements PricingServicePort
-│           │   ├── http_payment_gateway.py         # Implements PaymentGatewayPort
-│           │   └── http_email_service.py           # Implements EmailNotificationPort
-│           ├── messaging/
-│           │   ├── rabbitmq_connection.py          # Shared connection
-│           │   ├── rabbitmq_event_publisher.py     # Implements EventPublisherPort
-│           │   └── rabbitmq_notification_sender.py # Implements NotificationPort
-│           └── redis/
-│               ├── redis_connection.py             # Shared connection
-│               ├── redis_cache_service.py          # Implements CacheServicePort
-│               └── redis_session_store.py          # Implements SessionStorePort
-└── configuration/                           # Cross-cutting Configuration Layer
-    ├── di_container.py                      # Dependency injection container
-    ├── database_config.py                  # Database configuration
-    ├── app_settings.py                     # Application settings
-    └── environment_config.py               # Environment-specific config
-```
-
-### 15. Integration Flow Rules
+### 14. Integration Flow Rules
 - Primary adapters call primary ports (use cases)
 - Use cases orchestrate domain objects and use secondary ports for external systems
 - Secondary adapters implement secondary ports and handle external complexities
@@ -565,14 +473,14 @@ class CreateUserUseCase(CreateUserPort):  # Primary Port Implementation
 
 ## Synergy Rules for DDD + Ports & Adapters
 
-### 16. Repository as Secondary Port Rules
+### 15. Repository as Secondary Port Rules
 - Repository interfaces are domain ports (interfaces in domain layer)
 - Repository implementations are secondary adapters (in infrastructure layer)
 - Repositories should work with Aggregate Roots and use domain language
 - Repository adapters handle ORM mapping and database specifics
 - Keep repository interfaces focused on domain needs, not database capabilities
 
-### 17. Use Case as Primary Port Implementation Rules
+### 16. Use Case as Primary Port Implementation Rules
 - Use cases implement primary ports and orchestrate domain objects
 - They use both domain ports (repositories) and infrastructure ports (email, messaging)
 - Should not contain business logic - delegate to domain objects
@@ -604,7 +512,7 @@ class CreateUserUseCase(CreateUserPort):
             return CreateUserResponse(user.id.value)
 ```
 
-### 18. Event Integration Rules
+### 17. Event Integration Rules
 - Domain events should be published through infrastructure ports
 - Event handlers can be implemented as separate use cases
 - Use event-driven architecture for cross-bounded context communication
@@ -642,7 +550,7 @@ class SendWelcomeEmailUseCase:
         self._email_service.send_welcome_email(event.email, event.name)
 ```
 
-### 19. Cross-Cutting Concern Rules
+### 18. Cross-Cutting Concern Rules
 - Handle infrastructure concerns (logging, metrics, caching) in adapters
 - Use decorators or middleware patterns for cross-cutting concerns
 - Keep domain objects free from infrastructure dependencies
@@ -706,7 +614,7 @@ class InMemoryUserRepository(UserRepository):
         return next((u for u in self._users.values() if u.email == email), None)
 ```
 
-### 21. Validation and Error Handling Rules
+### 19. Validation and Error Handling Rules
 - Domain validation should happen in domain objects (entities, value objects)
 - Use domain exceptions that extend a base domain exception
 - Validation should be explicit and fail fast
@@ -729,7 +637,7 @@ class Email:
             raise InvalidEmailError(f"Invalid email: {self.value}")
 ```
 
-### 22. Naming Convention Rules
+### 20. Naming Convention Rules
 - Use domain language (Ubiquitous Language) for all class and method names
 - Avoid technical terms in domain layer (no "Manager", "Helper", "Util")  
 - Use intention-revealing names for methods
@@ -754,7 +662,7 @@ class SmtpEmailAdapter(EmailNotificationPort): # Secondary adapter (SMTP)
 class SendGridEmailAdapter(EmailNotificationPort): # Secondary adapter (SendGrid)
 ```
 
-### 23. Dependency Rules
+### 21. Dependency Rules
 - Domain layer should have no external dependencies except standard library
 - Application layer can depend on domain but should use dependency inversion for external concerns
 - Infrastructure layer implements all external dependencies through adapters
@@ -810,7 +718,7 @@ class SmtpEmailAdapter(EmailNotificationPort):  # Implements infrastructure port
         self._smtp_client = smtp_client
 ```
 
-### 24. Testing Rules
+### 22. Testing Rules
 - Write unit tests for domain logic without mocking domain objects
 - **Test Ports in Isolation**: Mock secondary ports when testing use cases
 - **Test Adapters Separately**: Test each adapter implementation independently
