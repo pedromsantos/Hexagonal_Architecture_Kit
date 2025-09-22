@@ -6,6 +6,65 @@ This document defines two complementary approaches that work together to create 
 
 ### The Integration Pattern
 
+```txt
+                               HEXAGONAL ARCHITECTURE
+                                 (Ports & Adapters)
+
+                                  External Systems
+                                ┌─────────────────┐
+                                │   REST Client   │
+                                │   Web Browser   │
+                                │   CLI Command   │
+                                └─────────────────┘
+                                        │
+                                        │ HTTP/CLI
+                                        ▼
+                                ┌─────────────────┐
+                                │ Driving Adapter │
+                                │  (Controllers)  │
+                                └─────────────────┘
+                                        │
+                                        │ Domain Commands
+                                        ▼
+    ┌─────────────────────────────────────────────────────────────────────┐
+    │                          APPLICATION LAYER                          │
+    │           ┌─────────────────┐          ┌─────────────────┐          │
+    │           │    Use Case     │          │    Use Case     │          │
+    │           │   (Register)    │          │   (Find User)   │          │
+    │           └─────────────────┘          └─────────────────┘          │
+    └──────────────────────────────────┬──────────────────────────────────┘
+                                       │ Domain Operations
+                                       ▼
+    ┌─────────────────────────────────────────────────────────────────────┐
+    │                      DOMAIN LAYER (DDD Core)                        │
+    │    ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐    │
+    │    │    Aggregate    │  │  Value Object   │  │  Domain Event   │    │
+    │    │      (User)     │  │    (Email)      │  │ (UserRegistered)│    │
+    │    └─────────────────┘  └─────────────────┘  └─────────────────┘    │
+    │                                                                     │
+    │    ┌─────────────────┐  ┌─────────────────┐                         │
+    │    │ Domain Service  │  │  Driven Port    │                         │
+    │    │ (UserValidator) │  │ (UserRepository)│   (Exit Points)         │
+    │    └─────────────────┘  └─────────────────┘   Interface only        │
+    └─────────────────────────────────────────────────────────────────────┘
+                                        │
+                                        │ External Operations
+                                        ▼
+                                ┌─────────────────┐
+                                │ Driven Adapter  │
+                                │ (Repositories)  │
+                                └─────────────────┘
+                                         │
+                                         │ (SQL)
+                                         ▼
+                                 External Systems
+                                ┌─────────────────┐
+                                │    Database     │
+                                │   Email API     │
+                                │   File System   │
+                                └─────────────────┘
+```
+
 **Core Domain Model** (Rules 1-14) focuses on business logic and domain concepts:
 
 - **Entities** (Rule 1) contain business behavior and have unique identity
