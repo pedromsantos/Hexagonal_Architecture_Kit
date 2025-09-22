@@ -8,14 +8,14 @@ This is a **documentation-only repository** containing comprehensive rules and g
 
 ## Repository Structure
 
-- `README.md` - Basic project introduction
-- `ruleset.md` - Comprehensive DDD and Hexagonal Architecture implementation rules with detailed Python code examples
+- `README.md` - Comprehensive DDD and Hexagonal Architecture implementation rules with detailed code examples in Python, Typescript, Java, C#, Rust and Go
 
 ## Key Architecture Patterns Documented
 
 This repository documents the integration of:
 
 1. **Domain Driven Design (DDD)** patterns:
+
    - Entity and Value Object design
    - Aggregate boundaries and rules
    - Domain Services
@@ -23,6 +23,7 @@ This repository documents the integration of:
    - Domain Events
 
 2. **Ports & Adapters (Hexagonal Architecture)** patterns:
+
    - Primary Ports (driving adapters - web controllers, CLI)
    - Secondary Ports (driven adapters - databases, external APIs)
    - Adapter implementations organized by technology
@@ -37,6 +38,7 @@ This repository documents the integration of:
 ## Development Context
 
 Since this is a documentation project:
+
 - No build, test, or compilation commands are needed
 - Changes involve editing markdown files
 - Focus is on clarity, accuracy, and completeness of architectural guidance
@@ -45,6 +47,7 @@ Since this is a documentation project:
 ## Content Guidelines
 
 When working with this repository:
+
 - Maintain consistency with existing code examples and naming conventions
 - Follow the established pattern of showing both interface definitions and implementations
 - Ensure Python code examples are syntactically correct and follow PEP 8
