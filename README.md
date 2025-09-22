@@ -2374,6 +2374,10 @@ This unified ruleset ensures consistent implementation of Domain Driven Design w
 
 CQRS perfectly complements Hexagonal Architecture by providing clear boundaries between business logic (commands through domain) and data access (queries around domain).
 
+#### CQRS myths
+
+CQRS does not mean that eventual consistency is requiered. This is only required for cases of high volume/scalability needs. CQRS can be implemented very simply using a table to write and a view to read. If the scalability of queries is very different the from commands and there is a lot of volume on queries, then CQRS does enable different scalability for commands and queries.
+
 ### The Key Insight: Different Paths for Reads and Writes
 
 ```txt
