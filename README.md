@@ -2,7 +2,11 @@
 
 ## TL;DR: How to: DDD and Ports & Adapters Work Together
 
-This document defines two complementary approaches that work together to create maintainable, testable applications across multiple programming languages.
+This document defines three complementary approaches that work together to create maintainable, testable applications across multiple programming languages.
+
+- Domain Driven Design (DDD)
+- Hexagonal Architecture or Ports & Adapters Architecture.
+- Command Query Responsability Segregations (CQRS) (TBD)
 
 Note: I used an LLM to convert the examples from Python to other languages, some of them I don't know well enough to judge on the quality of the examples.
 
