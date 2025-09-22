@@ -33,10 +33,14 @@ extend-exclude = ["migrations", ".venv", "__pycache__"]
 # Enable all rules by default, then selectively disable
 select = ["ALL"]
 ignore = [
-    "D100",    # Missing docstring in public module
-    "D104",    # Missing docstring in public package
+    # Docstrings - ignore all docstring requirements
+    "D",       # All pydocstyle rules (docstring requirements)
+
+    # Formatter conflicts
     "COM812",  # Trailing comma missing (conflicts with formatter)
     "ISC001",  # Implicitly concatenated string literals (conflicts with formatter)
+
+    # Architecture choices
     "TID252",  # Prefer absolute imports (we use relative imports in our architecture)
     "INP001",  # Implicit namespace package (acceptable for our structure)
 ]
@@ -44,9 +48,7 @@ ignore = [
 # Maximum complexity for functions
 max-complexity = 5
 
-[tool.ruff.lint.pydocstyle]
-# Strict docstring requirements
-convention = "google"
+# Docstring rules disabled - see ignore section above
 
 # Strict import sorting
 [tool.ruff.lint.isort]
@@ -57,16 +59,10 @@ known-first-party = ["src"]
 [tool.ruff.lint.per-file-ignores]
 # Test files can have longer lines and more complex functions
 "tests/*" = [
-    "D103",    # Missing docstring in public function (test functions are self-documenting)
     "S101",    # Use of assert detected (assert is expected in tests)
     "PLR0913", # Too many arguments to function call
     "PLR2004", # Magic value used in comparison
     "ANN201",  # Missing return type annotation for public function
-]
-
-# Main.py can have simple script structure
-"main.py" = [
-    "D100",    # Missing docstring in public module
 ]
 
 [tool.pyright]
