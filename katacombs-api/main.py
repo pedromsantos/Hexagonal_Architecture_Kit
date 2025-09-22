@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""
-Katacombs API - Text-based adventure game API
+"""Katacombs API - Text-based adventure game API
 Following DDD and Hexagonal Architecture principles
 """
 
 import uvicorn
+
 from src.katacombs.infrastructure.adapters.fastapi_app import create_app
 
 

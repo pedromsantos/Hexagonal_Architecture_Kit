@@ -1,14 +1,13 @@
-from ...domain.repositories.player_repository import PlayerRepository
-from ...domain.repositories.location_repository import LocationRepository
-from ...domain.entities.player import Player
 from ...domain.entities.bag import Bag
+from ...domain.entities.player import Player
+from ...domain.repositories.location_repository import LocationRepository
+from ...domain.repositories.player_repository import PlayerRepository
 from ...domain.value_objects import Sid
 from ..dtos.start_game_dto import StartGameCommand, StartGameResponse
 
 
 class StartGameUseCase:
-    """
-    Use Case - Start a new game
+    """Use Case - Start a new game
     Orchestrates the creation of a new player and places them in the starting location
     Contains NO business logic - only orchestration
     """
@@ -42,4 +41,4 @@ class StartGameUseCase:
         except ValueError as e:
             return StartGameResponse.error_response(str(e))
         except Exception as e:
-            return StartGameResponse.error_response(f"Failed to start game: {str(e)}")
+            return StartGameResponse.error_response(f"Failed to start game: {e!s}")

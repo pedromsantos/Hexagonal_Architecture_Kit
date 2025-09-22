@@ -1,14 +1,14 @@
-import pytest
 
-from src.katacombs.infrastructure.repositories.in_memory_location_repository import InMemoryLocationRepository
-from src.katacombs.domain.entities.location import Location
 from src.katacombs.domain.entities.item import Item
-from src.katacombs.domain.value_objects import Sid, Direction, Action
+from src.katacombs.domain.entities.location import Location
+from src.katacombs.domain.value_objects import Action, Direction, Sid
+from src.katacombs.infrastructure.repositories.in_memory_location_repository import (
+    InMemoryLocationRepository,
+)
 
 
 class TestLocationRepository:
-    """
-    INTEGRATION TEST: Location Repository Implementation
+    """INTEGRATION TEST: Location Repository Implementation
     Tests the driven adapter implementation with real storage
     """
 

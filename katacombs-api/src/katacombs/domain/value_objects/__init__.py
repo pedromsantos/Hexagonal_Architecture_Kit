@@ -1,5 +1,5 @@
-from .sid import Sid
-from .direction import Direction
 from .action import Action
+from .direction import Direction
+from .sid import Sid
 
-__all__ = ["Sid", "Direction", "Action"]
+__all__ = ["Action", "Direction", "Sid"]

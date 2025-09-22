@@ -1,7 +1,6 @@
 from dataclasses import dataclass, field
-from typing import List
 
-from ..value_objects import Sid, Action
+from ..value_objects import Action, Sid
 
 
 @dataclass
@@ -9,7 +8,7 @@ class Item:
     sid: Sid
     name: str
     description: str
-    available_actions: List[Action] = field(default_factory=list)
+    available_actions: list[Action] = field(default_factory=list)
 
     def __post_init__(self):
         if not self.name.strip():

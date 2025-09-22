@@ -1,17 +1,15 @@
-import pytest
 from unittest.mock import Mock
 
-from src.katacombs.application.use_cases.start_game import StartGameUseCase
-from src.katacombs.domain.repositories.player_repository import PlayerRepository
-from src.katacombs.domain.repositories.location_repository import LocationRepository
 from src.katacombs.application.dtos.start_game_dto import StartGameCommand, StartGameResponse
+from src.katacombs.application.use_cases.start_game import StartGameUseCase
 from src.katacombs.domain.entities.location import Location
+from src.katacombs.domain.repositories.location_repository import LocationRepository
+from src.katacombs.domain.repositories.player_repository import PlayerRepository
 from src.katacombs.domain.value_objects import Sid
 
 
 class TestStartGameUseCase:
-    """
-    UNIT TEST: Use Case orchestration logic
+    """UNIT TEST: Use Case orchestration logic
     This test should fail until we implement the use case orchestration
     """
 

@@ -1,13 +1,11 @@
 from abc import ABC, abstractmethod
-from typing import Optional
 
 from ..entities.player import Player
 from ..value_objects import Sid
 
 
 class PlayerRepository(ABC):
-    """
-    Driven Port - Repository interface for Player aggregate
+    """Driven Port - Repository interface for Player aggregate
     This belongs in the domain layer as it represents a domain concept
     """
 
@@ -16,7 +14,7 @@ class PlayerRepository(ABC):
         pass
 
     @abstractmethod
-    def find_by_sid(self, player_sid: Sid) -> Optional[Player]:
+    def find_by_sid(self, player_sid: Sid) -> Player | None:
         pass
 
     @abstractmethod

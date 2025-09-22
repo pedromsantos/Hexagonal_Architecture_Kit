@@ -1,14 +1,13 @@
 import pytest
 
-from src.katacombs.domain.entities.player import Player
-from src.katacombs.domain.entities.location import Location
 from src.katacombs.domain.entities.bag import Bag
+from src.katacombs.domain.entities.location import Location
+from src.katacombs.domain.entities.player import Player
 from src.katacombs.domain.value_objects import Sid
 
 
 class TestPlayer:
-    """
-    UNIT TEST: Player domain behavior
+    """UNIT TEST: Player domain behavior
     Test domain logic for Player aggregate
     """
 

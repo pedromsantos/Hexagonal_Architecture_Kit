@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional
 
 from ...domain.entities.player import Player
 
@@ -15,8 +14,8 @@ class StartGameCommand:
 class StartGameResponse:
     """Response after starting a new game"""
     success: bool
-    player: Optional[Player] = None
-    error_message: Optional[str] = None
+    player: Player | None = None
+    error_message: str | None = None
 
     @classmethod
     def success_response(cls, player: Player) -> "StartGameResponse":

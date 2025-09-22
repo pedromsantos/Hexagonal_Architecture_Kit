@@ -1,22 +1,20 @@
 from abc import ABC, abstractmethod
-from typing import Optional
 
 from ..entities.location import Location
 from ..value_objects import Sid
 
 
 class LocationRepository(ABC):
-    """
-    Driven Port - Repository interface for Location entity
+    """Driven Port - Repository interface for Location entity
     This belongs in the domain layer as it represents a domain concept
     """
 
     @abstractmethod
-    def find_by_sid(self, location_sid: Sid) -> Optional[Location]:
+    def find_by_sid(self, location_sid: Sid) -> Location | None:
         pass
 
     @abstractmethod
-    def find_starting_location(self) -> Optional[Location]:
+    def find_starting_location(self) -> Location | None:
         pass
 
     @abstractmethod

@@ -1,12 +1,10 @@
-import pytest
 from fastapi.testclient import TestClient
 
 from src.katacombs.infrastructure.adapters.fastapi_app import create_app
 
 
 class TestStartGameE2E:
-    """
-    END-TO-END TEST: Complete user journey through real transport and infrastructure
+    """END-TO-END TEST: Complete user journey through real transport and infrastructure
     Uses real HTTP server and real (in-memory) storage
     Tests the complete system behavior from HTTP request to final response
     """

@@ -1,11 +1,11 @@
-from fastapi import FastAPI, HTTPException, Depends
-from pydantic import BaseModel
-from typing import Optional
 
-from ...application.use_cases.start_game import StartGameUseCase
+from fastapi import Depends, FastAPI, HTTPException
+from pydantic import BaseModel
+
 from ...application.dtos.start_game_dto import StartGameCommand
-from ...infrastructure.repositories.in_memory_player_repository import InMemoryPlayerRepository
+from ...application.use_cases.start_game import StartGameUseCase
 from ...infrastructure.repositories.in_memory_location_repository import InMemoryLocationRepository
+from ...infrastructure.repositories.in_memory_player_repository import InMemoryPlayerRepository
 
 
 class StartGameRequest(BaseModel):
@@ -25,8 +25,7 @@ class ErrorResponse(BaseModel):
 
 
 def create_app() -> FastAPI:
-    """
-    Create and configure FastAPI application
+    """Create and configure FastAPI application
     This is a driving adapter that handles HTTP concerns
     """
     app = FastAPI(title="Katacombs API", version="1.0.0")
@@ -42,8 +41,7 @@ def create_app() -> FastAPI:
         request: StartGameRequest,
         use_case: StartGameUseCase = Depends(get_start_game_use_case)
     ) -> PlayerResponse:
-        """
-        Start a new game with a new player
+        """Start a new game with a new player
         Driving adapter - converts HTTP requests to domain commands
         """
         try:
@@ -96,6 +94,6 @@ def create_app() -> FastAPI:
         except ValueError as e:
             raise HTTPException(status_code=400, detail=str(e))
         except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Internal server error: {e!s}")
 
     return app

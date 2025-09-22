@@ -1,6 +1,6 @@
-from .player import Player
-from .location import Location
 from .bag import Bag
 from .item import Item
+from .location import Location
+from .player import Player
 
-__all__ = ["Player", "Location", "Bag", "Item"]
+__all__ = ["Bag", "Item", "Location", "Player"]

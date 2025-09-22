@@ -1,12 +1,10 @@
-import pytest
 from fastapi.testclient import TestClient
 
 from src.katacombs.infrastructure.adapters.fastapi_app import create_app
 
 
 class TestGameControllerContract:
-    """
-    CONTRACT TEST: HTTP Controllers (Driving Adapters)
+    """CONTRACT TEST: HTTP Controllers (Driving Adapters)
     Tests API contracts using real implementations (no mocking)
     Focuses on HTTP status codes, request/response format, headers, validation, etc.
 

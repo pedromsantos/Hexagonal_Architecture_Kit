@@ -1,14 +1,13 @@
 from dataclasses import dataclass
 
 from ..value_objects import Sid
-from .location import Location
 from .bag import Bag
+from .location import Location
 
 
 @dataclass
 class Player:
-    """
-    Player Aggregate Root
+    """Player Aggregate Root
     Represents a player in the Katacombs game
     """
     sid: Sid

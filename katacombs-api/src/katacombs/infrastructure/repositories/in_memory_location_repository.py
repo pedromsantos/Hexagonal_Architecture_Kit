@@ -1,19 +1,17 @@
-from typing import Optional, Dict
 
-from ...domain.repositories.location_repository import LocationRepository
-from ...domain.entities.location import Location
 from ...domain.entities.item import Item
-from ...domain.value_objects import Sid, Direction, Action
+from ...domain.entities.location import Location
+from ...domain.repositories.location_repository import LocationRepository
+from ...domain.value_objects import Action, Direction, Sid
 
 
 class InMemoryLocationRepository(LocationRepository):
-    """
-    Driven Adapter - In-memory implementation of LocationRepository
+    """Driven Adapter - In-memory implementation of LocationRepository
     Handles location persistence and provides a starting location
     """
 
     def __init__(self):
-        self._locations: Dict[Sid, Location] = {}
+        self._locations: dict[Sid, Location] = {}
         self._initialize_starting_location()
 
     def _initialize_starting_location(self):
@@ -42,11 +40,11 @@ class InMemoryLocationRepository(LocationRepository):
         self._locations[starting_sid] = starting_location
         self._starting_location_sid = starting_sid
 
-    def find_by_sid(self, location_sid: Sid) -> Optional[Location]:
+    def find_by_sid(self, location_sid: Sid) -> Location | None:
         """Find location by SID"""
         return self._locations.get(location_sid)
 
-    def find_starting_location(self) -> Optional[Location]:
+    def find_starting_location(self) -> Location | None:
         """Get the starting location for new players"""
         return self._locations.get(self._starting_location_sid)
 
