@@ -1,8 +1,8 @@
 # Domain Driven Design with Ports & Adapters Rules
 
-## TL;DR: How DDD and Ports & Adapters Work Together
+## TL;DR: How to: DDD and Ports & Adapters Work Together
 
-This document defines two complementary architectural approaches that work together to create maintainable, testable applications across multiple programming languages:
+This document defines two complementary approaches that work together to create maintainable, testable applications across multiple programming languages:
 
 ### The Integration Pattern
 
