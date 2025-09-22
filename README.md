@@ -2362,5 +2362,7 @@ This unified ruleset ensures consistent implementation of Domain Driven Design w
 ## References
 
 The initial ruleset was entirely taken from: <https://github.com/bardiakhosravi/agent-context-kit/blob/main/domain_driven_design_hexagonal_arhictecture_python_rules.md>
-Other sourcees of materials:
-Codely: <https://codely.com/en/blog/how-to-implement-ddd-code-using-ai>
+
+### Other sourcees of materials
+
+- Codely: <https://codely.com/en/blog/how-to-implement-ddd-code-using-ai>
