@@ -16,10 +16,10 @@ This document defines two complementary architectural approaches that work toget
 
 **Ports & Adapters** (Rules 1-12) focuses on architectural boundaries and external concerns:
 
-- **Primary Ports** define what your application can do (use case interfaces)
-- **Secondary Ports** define what your application needs (repositories, external services)
-- **Primary Adapters** translate external requests into domain operations (REST controllers, CLI)
-- **Secondary Adapters** implement external integrations (databases, APIs, file systems)
+- **Driving Ports** define what your application can do (use case interfaces)
+- **Driven Ports** define what your application needs (repositories, external services)
+- **Driving Adapters** translate external requests into domain operations (REST controllers, CLI)
+- **Driven Adapters** implement external integrations (databases, APIs, file systems)
 
 ### How They Connect in Practice
 
@@ -55,11 +55,11 @@ class ChangeUserEmailUseCase(ChangeUserEmailPort):  # Rule 9 + P&A Rule 1
         )
 
 # 3. Infrastructure Layer (Ports & Adapters Implementation)
-class SqlUserRepository(UserRepository):      # P&A Rule 3: Secondary adapter
+class SqlUserRepository(UserRepository):      # P&A Rule 3: Driven adapter
     def save(self, user: User) -> None:
         # Handle ORM mapping, database specifics
 
-class RestUserController:                     # P&A Rule 2: Primary adapter
+class RestUserController:                     # P&A Rule 2: Driving adapter
     def patch_user_email(self, user_id: str, request: ChangeEmailRequest):
         command = ChangeEmailCommand(user_id, request.email)
         self._use_case.execute(command)        # Delegate to use case
@@ -71,11 +71,11 @@ class RestUserController:                     # P&A Rule 2: Primary adapter
 
 2. **Use Cases** orchestrate domain objects and coordinate with external systems through **Secondary Ports**
 
-3. **Primary Adapters** translate external requests into domain commands and delegate to **Use Cases** through **Primary Ports**
+3. **Driving Adapters** translate external requests into domain commands and delegate to **Use Cases** through **Driving Ports**
 
-4. **Secondary Adapters** implement **Secondary Ports** and handle all external system complexity (databases, APIs, file systems, etc.)
+4. **Driven Adapters** implement **Driven Ports** and handle all external system complexity (databases, APIs, file systems, etc.)
 
-5. **Dependency Flow**: External → Primary Adapter → Use Case → Domain Objects → Secondary Ports → Secondary Adapters
+5. **Dependency Flow**: External → Driving Adapter → Use Case → Domain Objects → Driven Ports → Driven Adapters
 
 This creates a clean separation where:
 
@@ -350,10 +350,10 @@ class SendWelcomeEmailUseCase:
 ## Validation and Error Handling Rules
 
 - Test domain logic in isolation without any adapters
-- Test primary adapters by mocking primary ports
-- Test secondary adapters by mocking external dependencies
-- Use in-memory implementations of secondary ports for integration tests
-- Test the full flow from primary adapter to secondary adapter for end-to-end tests
+- Test driving adapters by mocking driving ports
+- Test driven adapters by mocking external dependencies
+- Use in-memory implementations of driven ports for integration tests
+- Test the full flow from driving adapter to driven adapter for end-to-end tests
 
 ```python
 # Testing with port isolation
@@ -415,8 +415,8 @@ class Email:
 - Use intention-revealing names for methods
 - Value objects should be named after the concept they represent
 - Repository methods should reflect business queries
-- **Port Naming**: End primary ports with "Port", secondary ports with "Port"
-- **Adapter Naming**: Include the technology/framework in secondary adapter names
+- **Port Naming**: End driving ports with "Port", driven ports with "Port"
+- **Adapter Naming**: Include the technology/framework in driven adapter names
 - **Clear Port vs Adapter distinction**: Ports define interfaces, Adapters implement them
 
 ```python
@@ -494,7 +494,7 @@ class SmtpEmailAdapter(EmailNotificationPort):  # Implements infrastructure port
 ### 14. Testing Rules
 
 - Write unit tests for domain logic without mocking domain objects
-- **Test Ports in Isolation**: Mock secondary ports when testing use cases
+- **Test Ports in Isolation**: Mock driven ports when testing use cases
 - **Test Adapters Separately**: Test each adapter implementation independently
 - **Integration Testing**: Use in-memory adapters for full workflow testing
 - Test domain events are raised correctly
@@ -575,14 +575,14 @@ class TestMongoUserRepository:
 ### 1. Port Definition Rules
 
 - Ports define interfaces between layers and external systems
-- **Primary ports** (driving) define application use cases - belong in application layer
-- **Domain-driven secondary ports** (repositories, domain services) - belong in domain layer
-- **Infrastructure secondary ports** (email, messaging, external APIs) - belong in application layer
+- **Driving ports** (primary/left-side) define application use cases - belong in application layer
+- **Domain-driven driven ports** (repositories, domain services) - belong in domain layer
+- **Infrastructure driven ports** (email, messaging, external APIs) - belong in application layer
 - Port interfaces should use domain language, not technical terms
 - Ports should be focused and follow Single Responsibility Principle
 
 ```python
-# Primary Ports (Application Layer) - application/ports/primary/
+# Driving Ports (Application Layer) - application/ports/driving/
 class CreateUserPort(ABC):
     @abstractmethod
     def execute(self, command: CreateUserCommand) -> CreateUserResponse:
@@ -593,7 +593,7 @@ class ChangeUserEmailPort(ABC):
     def execute(self, command: ChangeEmailCommand) -> None:
         pass
 
-# Domain-Driven Secondary Ports (Domain Layer) - domain/repositories/
+# Domain-Driven Driven Ports (Domain Layer) - domain/repositories/
 class UserRepository(ABC):  # Already shown in rule 5
     @abstractmethod
     def find_by_email(self, email: Email) -> Optional[User]:
@@ -605,7 +605,7 @@ class PricingServicePort(ABC):
     def calculate_product_price(self, product: Product, customer: Customer) -> Money:
         pass
 
-# Infrastructure Secondary Ports (Application Layer) - application/ports/secondary/
+# Infrastructure Driven Ports (Application Layer) - application/ports/driven/
 class EmailNotificationPort(ABC):
     @abstractmethod
     def send_welcome_email(self, user_email: Email, user_name: str) -> None:
@@ -621,16 +621,16 @@ class EventPublisherPort(ABC):
         pass
 ```
 
-### 2. Primary Adapter Rules
+### 2. Driving Adapter Rules
 
-- Primary adapters are the entry points (web controllers, CLI, message consumers)
+- Driving adapters are the entry points (web controllers, CLI, message consumers)
 - Should translate external requests to domain commands/queries
 - Must not contain business logic - only translation and validation
 - Should handle framework-specific concerns (HTTP status codes, serialization)
-- Should be thin and delegate to use cases through primary ports
+- Should be thin and delegate to use cases through driving ports
 
 ```python
-# FastAPI Controller (Primary Adapter)
+# FastAPI Controller (Driving Adapter)
 from fastapi import APIRouter, HTTPException, Depends, status
 from pydantic import BaseModel
 
@@ -718,10 +718,10 @@ async def deactivate_user(
         raise HTTPException(status_code=400, detail=str(e))
 ```
 
-### 3. Secondary Adapter Rules
+### 3. Driven Adapter Rules
 
-- Secondary adapters implement secondary ports defined in domain/application layers
-- Organize secondary adapters by technology for shared infrastructure and easier maintenance
+- Driven adapters implement driven ports defined in domain/application layers
+- Organize driven adapters by technology for shared infrastructure and easier maintenance
 - Should handle all external system complexities (database mapping, API calls, etc.)
 - Must translate between domain objects and external representations
 - Should not expose external system details to the domain
@@ -729,7 +729,7 @@ async def deactivate_user(
 - Keep technology-specific models/schemas within their adapter implementations
 
 ```python
-# SQL Database Adapter - infrastructure/adapters/secondary/sql/sql_user_repository.py
+# SQL Database Adapter - infrastructure/adapters/driven/sql/sql_user_repository.py
 class SqlUserRepository(UserRepository):
     def __init__(self, session: Session):
         self._session = session
@@ -754,7 +754,7 @@ class SqlUserRepository(UserRepository):
             name=model.name
         )
 
-# HTTP External Service Adapter - infrastructure/adapters/secondary/http/http_email_service.py
+# HTTP External Service Adapter - infrastructure/adapters/driven/http/http_email_service.py
 class HttpEmailNotificationAdapter(EmailNotificationPort):
     def __init__(self, http_client: HTTPClient, api_config: EmailAPIConfig):
         self._http_client = http_client
@@ -825,46 +825,46 @@ class DIContainer:
 
 ### 5. Integration Flow Rules
 
-- Primary adapters call primary ports (use cases)
-- Use cases orchestrate domain objects and use secondary ports for external systems
-- Secondary adapters implement secondary ports and handle external complexities
+- Driving adapters call driving ports (use cases)
+- Use cases orchestrate domain objects and use driven ports for external systems
+- Driven adapters implement driven ports and handle external complexities
 - Domain objects should never directly depend on adapters
 - Use events for loose coupling between bounded contexts
 
 ```python
 # Flow Example: Web Request → Controller → Use Case → Repository
-class UserController:  # Primary Adapter
+class UserController:  # Driving Adapter
     def create_user(self, request) -> Response:
         command = CreateUserCommand(request.email, request.name)
-        response = self._create_user_use_case.execute(command)  # → Primary Port
+        response = self._create_user_use_case.execute(command)  # → Driving Port
         return Response(201, {'user_id': response.user_id})
 
-class CreateUserUseCase(CreateUserPort):  # Primary Port Implementation
+class CreateUserUseCase(CreateUserPort):  # Driving Port Implementation
     def execute(self, command: CreateUserCommand) -> CreateUserResponse:
         email = Email(command.email)
         user = User.create(email, command.name)
-        self._user_repository.save(user)  # → Secondary Port
-        self._email_service.send_welcome_email(email, command.name)  # → Secondary Port
+        self._user_repository.save(user)  # → Driven Port
+        self._email_service.send_welcome_email(email, command.name)  # → Driven Port
         return CreateUserResponse(user.id.value)
 ```
 
-### 6. Repository as Secondary Port Rules
+### 6. Repository as Driven Port Rules
 
 - Repository interfaces are domain ports (interfaces in domain layer)
-- Repository implementations are secondary adapters (in infrastructure layer)
+- Repository implementations are driven adapters (in infrastructure layer)
 - Repositories should work with Aggregate Roots and use domain language
 - Repository adapters handle ORM mapping and database specifics
 - Keep repository interfaces focused on domain needs, not database capabilities
 
 ### 7. Time Abstraction Adapter Rules
 
-- Abstract system time through secondary ports to enable testing and deterministic behavior
+- Abstract system time through driven ports to enable testing and deterministic behavior
 - Time ports should be infrastructure concerns, not domain concerns
 - Use domain-appropriate time concepts (business hours, deadlines, schedules)
 - Enable easy mocking and testing of time-dependent business logic
 
 ```python
-# Infrastructure Secondary Port (Application Layer) - application/ports/secondary/
+# Infrastructure Driven Port (Application Layer) - application/ports/driven/
 class TimeProviderPort(ABC):
     @abstractmethod
     def now(self) -> datetime:
@@ -906,13 +906,13 @@ class FixedTimeProvider(TimeProviderPort):
 
 ### 8. File System Adapter Rules
 
-- Abstract file system operations through secondary ports for testability
+- Abstract file system operations through driven ports for testability
 - Handle different storage backends (local, cloud, network) through adapters
 - Use domain-specific file operations rather than generic file I/O
 - Include proper error handling for file operations
 
 ```python
-# Infrastructure Secondary Port (Application Layer) - application/ports/secondary/
+# Infrastructure Driven Port (Application Layer) - application/ports/driven/
 class FileStoragePort(ABC):
     @abstractmethod
     def save_document(self, document_id: DocumentId, content: bytes) -> None:
@@ -973,14 +973,14 @@ class S3FileStorageAdapter(FileStoragePort):
 
 ### 9. External API Adapter Rules
 
-- Abstract external service calls through secondary ports
+- Abstract external service calls through driven ports
 - Handle authentication, rate limiting, and retry logic in adapters
 - Map external API models to domain concepts
 - Provide fallback mechanisms and circuit breakers
 - Include comprehensive error handling for network issues
 
 ```python
-# Infrastructure Secondary Port (Application Layer) - application/ports/secondary/
+# Infrastructure Driven Port (Application Layer) - application/ports/driven/
 class PaymentProcessorPort(ABC):
     @abstractmethod
     def process_payment(self, amount: Money, payment_method: PaymentMethod) -> PaymentResult:
@@ -1047,13 +1047,13 @@ class TwilioNotificationAdapter(NotificationServicePort):
 
 ### 10. Random Number Generation Adapter Rules
 
-- Abstract random number generation through secondary ports for deterministic testing
+- Abstract random number generation through driven ports for deterministic testing
 - Provide both cryptographically secure and pseudo-random implementations
 - Enable seeded randomness for reproducible test scenarios
 - Use domain-appropriate random operations rather than raw random numbers
 
 ```python
-# Infrastructure Secondary Port (Application Layer) - application/ports/secondary/
+# Infrastructure Driven Port (Application Layer) - application/ports/driven/
 class RandomNumberProviderPort(ABC):
     @abstractmethod
     def random_int(self, min_value: int, max_value: int) -> int:
@@ -1127,13 +1127,13 @@ class FixedRandomProvider(RandomNumberProviderPort):
 
 ### 11. ID Generation Adapter Rules
 
-- Abstract ID generation through secondary ports for consistent and testable ID creation
+- Abstract ID generation through driven ports for consistent and testable ID creation
 - Support different ID formats (UUID, sequential, custom formats)
 - Enable deterministic ID generation for testing scenarios
 - Ensure ID uniqueness and appropriate format for domain needs
 
 ```python
-# Infrastructure Secondary Port (Application Layer) - application/ports/secondary/
+# Infrastructure Driven Port (Application Layer) - application/ports/driven/
 class IdGeneratorPort(ABC):
     @abstractmethod
     def generate_uuid(self) -> str:
@@ -1235,9 +1235,9 @@ class CreateUserUseCase(CreateUserPort):
             return CreateUserResponse(user_id.value)
 ```
 
-### 12. Use Case as Primary Port Implementation Rules
+### 12. Use Case as Driving Port Implementation Rules
 
-- Use cases implement primary ports and orchestrate domain objects
+- Use cases implement driving ports and orchestrate domain objects
 - They use both domain ports (repositories) and infrastructure ports (email, messaging)
 - Should not contain business logic - delegate to domain objects
 - Handle cross-cutting concerns like transactions and event publishing
