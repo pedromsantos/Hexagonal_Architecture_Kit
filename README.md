@@ -2206,13 +2206,21 @@ test("Complete user registration journey") {
 
 ### Key Principles
 
-1. **Test Pyramid**: More unit tests, fewer E2E tests
-2. **Boundary Clarity**: Each test type has a clear scope
-3. **Mock Strategy**: Mock external dependencies, use real domain objects
-4. **Fast Feedback**: Unit and acceptance tests should be fast
-5. **Realistic Validation**: Integration and E2E tests use real systems
-6. **Contract Verification**: Contract tests ensure API consistency
-7. **Responsibility Separation**: Each test type validates different concerns
+1. **Test-First Discipline**: No code without a failing test that traces to acceptance
+2. **Acceptance Test Authority**: The acceptance test is the ultimate authority on what to build
+3. **Acceptance Test Focus**: Everything exists to serve the acceptance test scenario
+4. **YAGNI with Purpose**: Only build what acceptance tests require (directly or indirectly)
+5. **Outside-In Flow**: Start with acceptance test, work inward to domain
+6. **Fast Feedback**: Unit and acceptance tests should be fast
+7. **Mock Strategy**: Mock external dependencies, use real domain objects
+8. **Realistic Validation**: Integration and E2E tests use real systems
+9. **Contract Verification**: Contract tests ensure API consistency
+10. **Boundary Clarity**: Each test type has a clear scope
+11. **Resposability Clarity**: Each tests has a clear responsability
+
+#### Golden Rule
+
+If you can't trace a piece of code back to making an acceptance test pass, remove it.
 
 ## Project Structure
 

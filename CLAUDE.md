@@ -80,11 +80,13 @@ Follow this exact sequence for each user story:
 ### Critical Test Distinctions
 
 **ACCEPTANCE TESTS** must cover **complete business flows**, not single operations:
+
 - ❌ **Wrong**: Testing single use case execution with mocks (this is a unit test)
 - ✅ **Right**: Testing complete user journey with multiple API calls representing real user behavior
 - Example: Start game → Player created → Location assigned → Can view description → Ready to play
 
 **Test Boundaries and Responsibilities**:
+
 - **Unit Tests**: Single class/module, mock dependencies, test domain behavior
 - **Integration Tests**: Adapter to external system, no mocks in boundary, test data transformation
 - **Contract Tests**: HTTP to use case, verify API contracts (status codes, headers, validation)
@@ -116,12 +118,14 @@ Follow this exact sequence for each user story:
 ### What to Mock vs What to Use Real
 
 **ALWAYS MOCK** (Driven Ports/Adapters):
+
 - `UserRepository`, `OrderRepository` interfaces
 - `EmailService`, `PaymentGateway` interfaces
 - `DatabaseConnection`, `HttpClient` interfaces
 - External system adapters
 
 **NEVER MOCK** (Domain Objects):
+
 - `User`, `Order`, `Product` entities
 - `Email`, `Money`, `Sid` value objects
 - `ShoppingCart`, `Invoice` aggregates
@@ -135,12 +139,14 @@ Follow this exact sequence for each user story:
 - ✅ **Right**: SID provided by external caller (UI, API client, external system)
 
 **Why this matters**:
+
 - **Separation of Concerns**: ID generation is an external system responsibility
 - **Testability**: Tests can provide predictable IDs for assertions
 - **Flexibility**: External systems can use their own ID generation strategies
 - **Domain Focus**: Domain objects focus on business logic, not technical concerns
 
 **Implementation**:
+
 ```python
 # API receives both name and SID from external caller
 class StartGameRequest(BaseModel):
