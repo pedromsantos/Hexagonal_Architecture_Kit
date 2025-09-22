@@ -2376,7 +2376,7 @@ CQRS perfectly complements Hexagonal Architecture by providing clear boundaries 
 
 #### CQRS myths
 
-CQRS does not mean that eventual consistency is requiered. This is only required for cases of high volume/scalability needs. CQRS can be implemented very simply using a table to write and a view to read. If the scalability of queries is very different the from commands and there is a lot of volume on queries, then CQRS does enable different scalability for commands and queries.
+CQRS does not mean that eventual consistency is requiered. This is only required for cases of high volume/scalability needs. CQRS can be implemented very simply using a table to write and a view to read. If the scalability of queries is very different the from commands and there is a lot of volume on queries, then CQRS does enable different scalability for commands and queries, but the advantages of using CQRS, as shown above, go well beyond Command/Query scalability.
 
 ### The Key Insight: Different Paths for Reads and Writes
 
