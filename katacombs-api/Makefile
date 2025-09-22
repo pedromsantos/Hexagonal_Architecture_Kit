@@ -1,7 +1,7 @@
 # Katacombs API Makefile
 # DDD + Hexagonal Architecture + London School TDD Project
 
-.PHONY: help install test test-unit test-integration test-contract test-acceptance test-e2e test-watch run dev clean lint format check
+.PHONY: help install test test-unit test-integration test-contract test-acceptance test-e2e test-watch run dev clean lint format check lint-fix format-check type-check quality quality-fix
 
 # Default target
 help: ## Show this help message
