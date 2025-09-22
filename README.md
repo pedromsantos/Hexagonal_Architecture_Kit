@@ -2216,8 +2216,8 @@ test("Complete user registration journey") {
 
 ## Project Structure
 
-We decided to use a "real" world scenario to ilustrate how to create the project structure.
-In this example we will explore how a typical folder structure for a project should look like.
+Using a "real" world scenario to ilustrate how to create the project structure.
+This example will explore how a typical folder structure for a project should look like.
 
 ## Aggregate Information
 
@@ -2371,6 +2371,8 @@ This unified ruleset ensures consistent implementation of Domain Driven Design w
 - CQRS separates your application operations into two distinct models:
   - **Commands**: Change state (writes) - e.g., `TransferMoneyCommand`, `RegisterUserCommand`
   - **Queries**: Read state (reads) - e.g., `GetAccountBalanceQuery`, `FindUserByEmailQuery`
+
+CQRS perfectly complements Hexagonal Architecture by providing clear boundaries between business logic (commands through domain) and data access (queries around domain).
 
 ### The Key Insight: Different Paths for Reads and Writes
 
@@ -2533,25 +2535,7 @@ class AccountProjectionRepository {
     );
   }
 }
-```
-
-### When to Use CQRS
-
-✅ **Use CQRS when:**
-
-- Read and write requirements are very different
-- You need optimized reads (reporting, dashboards, complex queries)
-- You want to avoid polluting domain with read concerns
-- You need independent scaling of reads vs writes
-
-❌ **Don't use CQRS when:**
-
-- Simple CRUD applications
-- Read and write models are very similar
-- Team lacks experience with eventual consistency
-- Over-engineering for simple scenarios
-
-CQRS perfectly complements Hexagonal Architecture by providing clear boundaries between business logic (commands through domain) and data access (queries around domain).
+``
 
 ## References
 
@@ -2562,3 +2546,4 @@ The initial ruleset was entirely taken from: <https://github.com/bardiakhosravi/
 - Codely: <https://codely.com/en/blog/how-to-implement-ddd-code-using-ai>
 - Los Techies: <https://lostechies.com/jimmybogard/2008/05/21/entities-value-objects-aggregates-and-roots/>
 - Herberto Graça: <https://herbertograca.com/2017/07/03/the-software-architecture-chronicles//>
+```
