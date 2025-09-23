@@ -25,10 +25,13 @@ Note: I used an LLM to convert the examples from Python to other languages, some
                                         │
                                         │ HTTP/CLI
                                         ▼
-                                ┌─────────────────┐
-                                │ Driving Adapter │
-                                │  (Controllers)  │
-                                └─────────────────┘
+     ┌─────────────────────────────────────────────────────────────────────┐
+     │                          Infrastructure Layer                       │
+     │                          ┌─────────────────┐                        │
+     │                          │ Driving Adapter │                        │
+     │                          │  (Controllers)  │                        │
+     │                          └─────────────────┘                        │
+     └──────────────────────────────────┬──────────────────────────────────┘
                                         │
                                         │ Domain Commands
                                         ▼
@@ -56,11 +59,13 @@ Note: I used an LLM to convert the examples from Python to other languages, some
                                         │
                                         │ External Operations
                                         ▼
-                                ┌─────────────────┐
-                                │ Driven Adapter  │
-                                │ (Repositories)  │
-                                └─────────────────┘
-                                         │
+    ┌─────────────────────────────────────────────────────────────────────┐
+    │                          Infrastructure Layer                       │
+    │                           ┌─────────────────┐                       │
+    │                           │ Driven Adapter  │                       │
+    │                           │ (Repositories)  │                       │
+    │                           └─────────────────┘                       │
+    └────────────────────────────────────┬────────────────────────────────┘
                                          │ (SQL)
                                          ▼
                                  External Systems
