@@ -21,18 +21,16 @@ Note: I used an LLM to convert the examples from Python to other languages, some
                                 │   REST Client   │
                                 │   Web Browser   │
                                 │   CLI Command   │
-                                └─────────────────┘
-                                        │
+                                └───────┬─────────┘
                                         │ HTTP/CLI
                                         ▼
     ┌─────────────────────────────────────────────────────────────────────┐
-    │                          Infrastructure Layer                       │
+    │                          INFRASTRUCTURE LAYER                       │
     │                          ┌─────────────────┐                        │
     │                          │ Driving Adapter │                        │
     │                          │  (Controllers)  │                        │
     │                          └─────────────────┘                        │
     └──────────────────────────────────┬──────────────────────────────────┘
-                                       │
                                        │ Domain Commands
                                        ▼
     ┌─────────────────────────────────────────────────────────────────────┐
@@ -55,12 +53,11 @@ Note: I used an LLM to convert the examples from Python to other languages, some
     │    │ Domain Service  │  │  Driven Port    │                         │
     │    │ (UserValidator) │  │ (UserRepository)│   (Exit Points)         │
     │    └─────────────────┘  └─────────────────┘   Interface only        │
-    └─────────────────────────────────────────────────────────────────────┘
-                                        │
+    └───────────────────────────────────┬─────────────────────────────────┘
                                         │ External Operations
                                         ▼
     ┌─────────────────────────────────────────────────────────────────────┐
-    │                          Infrastructure Layer                       │
+    │                          INFRASTRUCTURE LAYER                       │
     │                           ┌─────────────────┐                       │
     │                           │ Driven Adapter  │                       │
     │                           │ (Repositories)  │                       │
