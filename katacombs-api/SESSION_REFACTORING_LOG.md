@@ -144,6 +144,14 @@ tests/
 
 **Solution Direction:** Only verify command methods, not query methods.
 
+### 9. "Add missing unit tests"
+
+**Feedback:** _"@tests/domain/world/ has a lot of code but no tests, we need at least unit tests for all these behaviours"_
+
+**Issue:** Tests missing for World Aggregate, generated code without creating tests first.
+
+**Solution Direction:** Create Comprehensive Unit Tests for Domain Behavior.
+
 ---
 
 ## Refactoring Work Performed
@@ -523,11 +531,7 @@ tests/domain/world/
 
 **Outcome:** ✅ Complete domain behavior coverage with 47 additional unit tests.
 
-### Phase 10: Establish Test-First Development Principle
-
-#### 10.1 Critical Development Rule Added
-
-**Core Principle:** You should not generate any code without creating a test before.
+##### Core Principle: Do not write any code without creating a test before
 
 **Why This Matters:**
 
