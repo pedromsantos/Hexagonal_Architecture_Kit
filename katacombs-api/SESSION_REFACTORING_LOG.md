@@ -384,6 +384,14 @@ class WorldRepository(ABC):     # ✅ Correct - World is aggregate root
     def get_world(self) -> World:
 ```
 
+#### 6.2 Repository Pattern (After)
+
+```txt
+Use Case → Repository.get_world() → World.get_starting_location()
+         ↓                        ↓
+    Loads Aggregate          Traverses Aggregate
+```
+
 #### 6.2 Updated Implementation
 
 ```python
@@ -436,8 +444,6 @@ starting_location = world.get_starting_location()
 **Outcome:** ✅ Proper DDD aggregate pattern implemented.
 
 ### Phase 8: Document Mock Verification Principle
-
-#### 8.1 Added to CLAUDE.md
 
 ````python
 # Added comprehensive guidance on mock verification
@@ -722,14 +728,6 @@ tests/
         └── repositories/
             ├── test_player_repository_integration.py     # INTEGRATION TEST
             └── test_world_repository_integration.py      # INTEGRATION TEST
-```
-
-### Repository Pattern (After)
-
-```txt
-Use Case → Repository.get_world() → World.get_starting_location()
-         ↓                        ↓
-    Loads Aggregate          Traverses Aggregate
 ```
 
 ---
