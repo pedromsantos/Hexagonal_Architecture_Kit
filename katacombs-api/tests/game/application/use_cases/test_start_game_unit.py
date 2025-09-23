@@ -1,9 +1,9 @@
 from unittest.mock import Mock
 
-from src.katacombs.application.dtos.start_game_dto import StartGameCommand, StartGameResponse
-from src.katacombs.application.use_cases.start_game import StartGameUseCase
-from src.katacombs.domain.player import PlayerRepository, Sid
-from src.katacombs.domain.world import Location, WorldRepository
+from src.game.application.dtos.start_game_dto import StartGameCommand, StartGameResponse
+from src.game.application.use_cases.start_game import StartGameUseCase
+from src.game.domain.player import PlayerRepository, Sid
+from src.game.domain.world import Location, WorldRepository
 
 
 class TestStartGameUseCase:
@@ -17,7 +17,7 @@ class TestStartGameUseCase:
         mock_world_repo = Mock(spec=WorldRepository)
 
         # Use REAL domain entities - never mock domain objects
-        from src.katacombs.domain.world import World
+        from src.game.domain.world import World
         real_starting_location = Location(
             sid=Sid.generate(), description="Starting location for the game"
         )

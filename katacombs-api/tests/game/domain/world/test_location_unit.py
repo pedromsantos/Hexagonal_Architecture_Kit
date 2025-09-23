@@ -1,7 +1,7 @@
 import pytest
 
-from src.katacombs.domain.player import Sid
-from src.katacombs.domain.world import Action, Direction, Item, Location
+from src.game.domain.player import Sid
+from src.game.domain.world import Action, Direction, Item, Location
 
 
 class TestLocation:

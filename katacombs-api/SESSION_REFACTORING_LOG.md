@@ -152,6 +152,14 @@ tests/
 
 **Solution Direction:** Create Comprehensive Unit Tests for Domain Behavior.
 
+### 10. "Add Bounded Contexts"
+
+**Feedback:** _"code should align with Bounded Contexts"_
+
+**Issue:** Code not organized by bounded contexts
+
+**Solution Direction:** Reorganize code to mirror bounded context structure.
+
 ---
 
 ## Refactoring Work Performed
@@ -549,49 +557,171 @@ tests/domain/world/
 
 **Outcome:** ✅ Test-first development principle established and documented.
 
+### Phase 11: Reorganize by Bounded Contexts
+
+#### 11.1 Identified Technical vs Business Organization Issue
+
+```txt
+# Problem: Code organized by technical concerns instead of business domains
+src/katacombs/                # ❌ Generic domain name
+├── application/               # ❌ Technical grouping across all domains
+├── domain/                    # ❌ Mixed business contexts
+└── infrastructure/            # ❌ Technical grouping across all domains
+
+tests/                         # ❌ Technical layer grouping
+├── application/               # ❌ Technical concerns
+├── domain/                    # ❌ Technical concerns
+└── infrastructure/            # ❌ Technical concerns
+```
+
+**Issues:**
+
+- Single monolithic domain structure doesn't scale
+- Mixed business contexts in same technical folders
+- Tests organized by technical layers, not business domains
+- Difficult to identify bounded context boundaries
+- Team ownership unclear for different business areas
+
+#### 11.2 Created Bounded Context Structure
+
+```txt
+# Solution: Organize by business bounded contexts
+src/game/                      # ✅ GAME BOUNDED CONTEXT
+├── application/               # ✅ Game-specific application layer
+│   ├── dtos/
+│   └── use_cases/
+├── domain/                    # ✅ Game-specific domain
+│   ├── player/                # ✅ Player aggregate
+│   └── world/                 # ✅ World aggregate
+└── infrastructure/            # ✅ Game-specific infrastructure
+    ├── adapters/
+    └── repositories/
+
+# Future bounded contexts can be added:
+src/user_management/           # 🔮 Future: User Management bounded context
+src/billing/                   # 🔮 Future: Billing bounded context
+src/analytics/                 # 🔮 Future: Analytics bounded context
+```
+
+#### 11.3 Aligned Test Structure with Bounded Contexts
+
+```txt
+# Before: Technical layer organization
+tests/
+├── application/               # ❌ Technical grouping
+│   └── use_cases/
+├── domain/                    # ❌ Technical grouping
+│   ├── player/
+│   └── world/
+└── infrastructure/            # ❌ Technical grouping
+    ├── adapters/
+    └── repositories/
+
+# After: Bounded context mirroring
+tests/
+└── game/                      # ✅ GAME BOUNDED CONTEXT TESTS
+    ├── application/           # ✅ Game application tests
+    │   └── use_cases/         # 5 tests (acceptance, e2e, unit)
+    ├── domain/                # ✅ Game domain tests
+    │   ├── player/            # 4 player unit tests
+    │   └── world/             # 47 world domain unit tests
+    └── infrastructure/        # ✅ Game infrastructure tests
+        ├── adapters/          # 6 contract tests
+        └── repositories/      # 9 integration tests
+```
+
+#### 11.4 Updated All Import References
+
+```python
+# Before: Generic domain imports
+from src.katacombs.domain.player import Player
+from src.katacombs.application.use_cases.start_game import StartGameUseCase
+from src.katacombs.infrastructure.adapters.fastapi_app import create_app
+
+# After: Bounded context imports
+from src.game.domain.player import Player
+from src.game.application.use_cases.start_game import StartGameUseCase
+from src.game.infrastructure.adapters.fastapi_app import create_app
+```
+
+#### 11.5 Benefits Achieved
+
+**Scalability**: Each bounded context is self-contained and can evolve independently.
+
+**Team Ownership**: Clear boundaries for team responsibility - Game team owns `src/game/` and `tests/game/`.
+
+**Business Clarity**: Organization reflects business domains, not technical concerns.
+
+**Deployment Independence**: Each bounded context can potentially be deployed separately.
+
+**Natural Navigation**: Easy to find all code (production + tests) for a specific business domain.
+
+**Future Growth**: New bounded contexts can be added without affecting existing ones.
+
+**Outcome:** ✅ Complete bounded context organization established for both production and test code.
+
 ---
 
 ## Final Architecture
 
-### Domain Structure (After)
+### Bounded Context Structure (After)
 
 ```txt
-src/katacombs/domain/
-├── player/                    # PLAYER AGGREGATE
-│   ├── __init__.py           # exports: Bag, Player, PlayerRepository, Sid
-│   ├── player.py             # (aggregate root)
-│   ├── bag.py                # (entity owned by player)
-│   ├── sid.py                # (value object for identity)
-│   └── player_repository.py  # (repository interface for player aggregate)
-└── world/                     # WORLD AGGREGATE
-    ├── __init__.py           # exports: Action, Direction, Item, Location, World, WorldBuilder, WorldRepository
-    ├── world.py              # (aggregate root)
-    ├── location.py           # (entity part of world)
-    ├── item.py               # (entity exists in locations)
-    ├── action.py             # (value object for interactions)
-    ├── direction.py          # (value object for navigation)
-    ├── world_builder.py      # (domain service)
-    └── world_repository.py   # (repository interface for world aggregate)
+src/
+└── game/                      # GAME BOUNDED CONTEXT
+    ├── application/
+    │   ├── dtos/
+    │   │   └── start_game_dto.py
+    │   └── use_cases/
+    │       └── start_game.py
+    ├── domain/
+    │   ├── player/            # PLAYER AGGREGATE
+    │   │   ├── __init__.py   # exports: Bag, Player, PlayerRepository, Sid
+    │   │   ├── player.py     # (aggregate root)
+    │   │   ├── bag.py        # (entity owned by player)
+    │   │   ├── sid.py        # (value object for identity)
+    │   │   └── player_repository.py  # (repository interface)
+    │   └── world/             # WORLD AGGREGATE
+    │       ├── __init__.py   # exports: Action, Direction, Item, Location, World, WorldBuilder, WorldRepository
+    │       ├── world.py      # (aggregate root)
+    │       ├── location.py   # (entity part of world)
+    │       ├── item.py       # (entity exists in locations)
+    │       ├── action.py     # (value object for interactions)
+    │       ├── direction.py  # (value object for navigation)
+    │       ├── world_builder.py      # (domain service)
+    │       └── world_repository.py   # (repository interface)
+    └── infrastructure/
+        ├── adapters/
+        │   └── fastapi_app.py
+        └── repositories/
+            ├── in_memory_player_repository.py
+            └── in_memory_world_repository.py
 ```
 
 ### Test Structure (After)
 
 ```txt
 tests/
-├── application/
-│   └── use_cases/
-│       ├── test_start_game_acceptance.py     # ACCEPTANCE TEST
-│       ├── test_start_game_e2e.py           # END-TO-END TEST
-│       └── test_start_game_unit.py          # UNIT TEST (use case logic)
-├── domain/
-│   └── player/
-│       └── test_player_unit.py              # UNIT TEST (domain entity)
-└── infrastructure/
-    ├── adapters/
-    │   └── test_game_controller_contract.py  # CONTRACT TEST (HTTP API)
-    └── repositories/
-        ├── test_world_repository_integration.py      # INTEGRATION TEST
-        └── test_player_repository_integration.py     # INTEGRATION TEST
+└── game/                      # GAME BOUNDED CONTEXT TESTS
+    ├── application/
+    │   └── use_cases/
+    │       ├── test_start_game_acceptance.py     # ACCEPTANCE TEST
+    │       ├── test_start_game_e2e.py           # END-TO-END TEST
+    │       └── test_start_game_unit.py          # UNIT TEST (use case logic)
+    ├── domain/
+    │   ├── player/
+    │   │   └── test_player_unit.py              # UNIT TEST (player aggregate)
+    │   └── world/
+    │       ├── test_item_unit.py                # UNIT TEST (item entity)
+    │       ├── test_location_unit.py            # UNIT TEST (location entity)
+    │       ├── test_world_builder_unit.py       # UNIT TEST (world builder service)
+    │       └── test_world_unit.py               # UNIT TEST (world aggregate)
+    └── infrastructure/
+        ├── adapters/
+        │   └── test_game_controller_contract.py  # CONTRACT TEST (HTTP API)
+        └── repositories/
+            ├── test_player_repository_integration.py     # INTEGRATION TEST
+            └── test_world_repository_integration.py      # INTEGRATION TEST
 ```
 
 ### Repository Pattern (After)
@@ -706,6 +836,14 @@ Use Case → Repository.get_world() → World.get_starting_location()
 - Tests define expected behavior before implementation
 - Prevents over-engineering and YAGNI violations
 - Ensures all code serves verified test requirements
+
+### 7. **Bounded Context Organization**
+
+- Organize code by business domains, not technical concerns
+- Each bounded context is self-contained and independently evolvable
+- Tests mirror production bounded context structure
+- Clear team ownership and deployment boundaries
+- Scalable architecture for multiple business domains
 
 ---
 

@@ -1,7 +1,7 @@
 import pytest
 
-from src.katacombs.domain.player import Bag, Player, Sid
-from src.katacombs.domain.world import Location
+from src.game.domain.player import Bag, Player, Sid
+from src.game.domain.world import Location
 
 
 class TestPlayer:

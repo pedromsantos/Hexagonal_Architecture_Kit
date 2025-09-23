@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 
-from src.katacombs.infrastructure.adapters.fastapi_app import create_app
+from src.game.infrastructure.adapters.fastapi_app import create_app
 
 
 class TestStartGameE2E:

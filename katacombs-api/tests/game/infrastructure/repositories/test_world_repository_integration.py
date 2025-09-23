@@ -1,6 +1,6 @@
-from src.katacombs.domain.player import Sid
-from src.katacombs.domain.world import Action, Direction, Item, Location, World, WorldBuilder
-from src.katacombs.infrastructure.repositories.in_memory_world_repository import (
+from src.game.domain.player import Sid
+from src.game.domain.world import Action, Direction, Item, Location, World, WorldBuilder
+from src.game.infrastructure.repositories.in_memory_world_repository import (
     InMemoryWorldRepository,
 )
 

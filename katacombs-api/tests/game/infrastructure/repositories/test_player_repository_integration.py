@@ -1,6 +1,6 @@
-from src.katacombs.domain.player import Bag, Player, Sid
-from src.katacombs.domain.world import Location
-from src.katacombs.infrastructure.repositories.in_memory_player_repository import (
+from src.game.domain.player import Bag, Player, Sid
+from src.game.domain.world import Location
+from src.game.infrastructure.repositories.in_memory_player_repository import (
     InMemoryPlayerRepository,
 )
 
