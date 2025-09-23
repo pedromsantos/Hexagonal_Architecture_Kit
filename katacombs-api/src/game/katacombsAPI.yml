@@ -1,41 +1,31 @@
-# TODO
-
-Following the guidance in README.md and Claude.md
-
-- create a python backend REST api
-- use FastAPI for the Rest API
-- use uv for dependency management.
-
-the definition of the api is this REST API, based on terminal only adventure games from the early days pf PC's:
-
 openapi: 3.0.0
 info:
-description: This API allows playing a text-based adventure game called Katacombs
-version: 1.0.0
-title: Katacombs API
-license:
-name: Apache 2.0
-url: https://www.apache.org/licenses/LICENSE-2.0.html
+  description: This API allows playing a text-based adventure game called Katacombs
+  version: 1.0.0
+  title: Katacombs API
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
 servers:
-
-- url: /
-  tags:
-- name: Game
-  description: Start and Quit a game, help and list active players
-- name: Player
-  description: Interact with the game as a player
-  paths:
+  - url: /
+tags:
+  - name: Game
+    description: Start and Quit a game, help and list active players
+  - name: Player
+    description: Interact with the game as a player
+paths:
   /game/player:
-  post:
-  tags: - Game
-  summary: Start a new game
-  description: Start a new game with a new player
-  operationId: startGame
-  requestBody:
-  content:
-  application/json:
-  schema:
-  $ref: "#/components/schemas/Player"
+    post:
+      tags:
+        - Game
+      summary: Start a new game
+      description: Start a new game with a new player
+      operationId: startGame
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Player"
       responses:
         "201":
           description: Game started successfully
@@ -345,13 +335,15 @@ components:
       description: Unique identifier for game entities
       type: string
       pattern: "^[0-9]{6}-[0-9]{12}-[00-9]{8}$"
-  example: "001001-999199919878-99989798"
-  Error:
-  type: object
-  properties:
-  code:
-  type: integer
-  format: int32
-  message:
-  type: string
-  required: - code - message
+      example: "001001-999199919878-99989798"
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+      required:
+        - code
+        - message
