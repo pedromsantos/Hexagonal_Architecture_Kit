@@ -2779,7 +2779,7 @@ class AccountProjectionRepository {
 
 ## References
 
-The initial ruleset was entirely taken from: <https://github.com/bardiakhosravi/agent-context-kit/tree/main>
+The initial ruleset was entirely taken from: <https://github.com/bardiakhosravi/agent-context-kit>
 
 ### Other sourcees of materials
 
