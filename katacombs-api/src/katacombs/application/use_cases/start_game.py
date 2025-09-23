@@ -1,8 +1,5 @@
-from ...domain.entities.bag import Bag
-from ...domain.entities.player import Player
-from ...domain.repositories.location_repository import LocationRepository
-from ...domain.repositories.player_repository import PlayerRepository
-from ...domain.value_objects import Sid
+from ...domain.player import Bag, Player, PlayerRepository, Sid
+from ...domain.world import WorldRepository
 from ..dtos.start_game_dto import (
     BagData,
     ItemData,
@@ -22,16 +19,17 @@ class StartGameUseCase:
     def __init__(
         self,
         player_repository: PlayerRepository,
-        location_repository: LocationRepository,
+        world_repository: WorldRepository,
     ) -> None:
         self._player_repository = player_repository
-        self._location_repository = location_repository
+        self._world_repository = world_repository
 
     def execute(self, command: StartGameCommand) -> StartGameResponse:
         """Execute the start game use case"""
         try:
-            # Get the starting location
-            starting_location = self._location_repository.find_starting_location()
+            # Get the world and find starting location through the aggregate
+            world = self._world_repository.get_world()
+            starting_location = world.get_starting_location()
             if not starting_location:
                 return StartGameResponse.error_response("No starting location found")
 

@@ -5,8 +5,8 @@ from pydantic import BaseModel
 
 from ...application.dtos.start_game_dto import PlayerData, StartGameCommand
 from ...application.use_cases.start_game import StartGameUseCase
-from ...infrastructure.repositories.in_memory_location_repository import InMemoryLocationRepository
 from ...infrastructure.repositories.in_memory_player_repository import InMemoryPlayerRepository
+from ...infrastructure.repositories.in_memory_world_repository import InMemoryWorldRepository
 
 
 class StartGameRequest(BaseModel):
@@ -85,8 +85,8 @@ def _convert_player_data_to_response(player_data: PlayerData) -> PlayerResponse:
 def get_start_game_use_case() -> StartGameUseCase:
     """Dependency injection for start game use case"""
     player_repo = InMemoryPlayerRepository()
-    location_repo = InMemoryLocationRepository()
-    return StartGameUseCase(player_repo, location_repo)
+    world_repo = InMemoryWorldRepository()
+    return StartGameUseCase(player_repo, world_repo)
 
 
 async def start_game(

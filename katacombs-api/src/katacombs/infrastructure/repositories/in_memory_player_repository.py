@@ -1,6 +1,4 @@
-from ...domain.entities.player import Player
-from ...domain.repositories.player_repository import PlayerRepository
-from ...domain.value_objects import Sid
+from ...domain.player import Player, PlayerRepository, Sid
 
 
 class InMemoryPlayerRepository(PlayerRepository):

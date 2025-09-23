@@ -131,6 +131,37 @@ Follow this exact sequence for each user story:
 - `ShoppingCart`, `Invoice` aggregates
 - Domain events and domain services
 
+### Mock Verification Principle
+
+**Only verify COMMANDS (methods that cause side effects), never verify QUERIES (methods that return data):**
+
+**ALWAYS VERIFY** (Commands - Side Effects):
+
+```python
+# ✅ Verify commands that cause state changes
+mock_player_repo.save.assert_called_once()
+mock_email_service.send.assert_called_once()
+mock_payment_gateway.charge.assert_called_once()
+```
+
+**NEVER VERIFY** (Queries - Data Retrieval):
+
+```python
+# ❌ Do NOT verify queries - this makes tests brittle
+mock_world_repo.find_starting_location.assert_called_once()  # Wrong!
+mock_user_repo.find_by_id.assert_called_once()              # Wrong!
+mock_config.get_setting.assert_called_once()                # Wrong!
+```
+
+**Why this matters:**
+
+- **Queries are implementation details** - how data is retrieved shouldn't matter to the test
+- **Commands are behaviors** - side effects must happen for the system to work correctly
+- **Brittle tests** - verifying queries makes tests break when you refactor data access
+- **Focus on outcomes** - test what the system does, not how it gets information
+
+**Query verification is redundant** - if the system works correctly, the query must have been called.
+
 ### External ID Generation Principle
 
 **IDs/SIDs should be generated OUTSIDE the application**, not by domain objects:
@@ -221,3 +252,75 @@ When implementing a new user story:
 - **Proper test taxonomy** - acceptance tests test flows, not single operations
 
 Always follow the test pyramid: more unit tests, fewer E2E tests, but make sure acceptance tests cover **real business workflows**.
+
+## Aggregate-Repository Pattern & Traversal
+
+### Critical Repository-Aggregate Relationship
+
+**The repository pattern has a 1:1 relationship with aggregate roots**:
+
+- ❌ **Wrong**: `LocationRepository`, `ItemRepository` for individual entities
+- ✅ **Right**: `WorldRepository` for the World aggregate root
+
+**Repository loads the complete aggregate, aggregate root handles traversal**:
+
+```python
+# ❌ Wrong: Repository provides entity-specific query methods
+class WorldRepository(ABC):
+    @abstractmethod
+    def find_location_by_sid(self, location_sid: Sid) -> Location | None:
+        pass
+
+    @abstractmethod
+    def find_starting_location(self) -> Location | None:
+        pass
+
+# ✅ Right: Repository loads aggregate, aggregate provides traversal
+class WorldRepository(ABC):
+    @abstractmethod
+    def get_world(self) -> World:
+        """Get the complete world aggregate with all locations loaded"""
+        pass
+
+# Aggregate root provides traversal methods
+class World:
+    def get_location(self, location_sid: Sid) -> Location | None:
+        return self._locations.get(location_sid)
+
+    def get_starting_location(self) -> Location | None:
+        return self._locations.get(self._starting_location_sid)
+```
+
+### Why This Pattern Matters
+
+**Aggregate Integrity**: The aggregate root maintains consistency and business rules across all entities within the aggregate boundary.
+
+**Performance**: Loading the complete aggregate once is more efficient than multiple entity queries.
+
+**Domain Clarity**: Traversal logic belongs in the domain layer (aggregate root), not infrastructure layer (repository).
+
+**Testing**: Easier to test domain behavior when aggregate handles its own traversal rather than depending on repository query methods.
+
+### Implementation Guidelines
+
+1. **One Repository Per Aggregate**: Each aggregate root gets exactly one repository interface
+2. **Load Complete Aggregate**: Repository methods load all related entities within the aggregate boundary
+3. **Aggregate Handles Queries**: All entity lookup and traversal logic resides in the aggregate root
+4. **No Entity Repositories**: Individual entities within an aggregate do not get their own repositories
+
+### Usage Example
+
+```python
+# Use case gets aggregate from repository, then uses aggregate methods
+class StartGameUseCase:
+    def execute(self, command: StartGameCommand) -> StartGameResponse:
+        # Repository loads complete aggregate
+        world = self._world_repository.get_world()
+
+        # Aggregate root handles traversal
+        starting_location = world.get_starting_location()
+
+        # Domain logic continues...
+```
+
+This pattern ensures proper separation of concerns and maintains aggregate boundaries as designed in Domain-Driven Design.

@@ -1213,6 +1213,234 @@ type UserRepository interface {
 - Handle optimistic concurrency using version fields
 - Repository should not contain business logic
 
+### Aggregate-Repository Pattern & Traversal
+
+#### Critical Repository-Aggregate Relationship
+
+**The repository pattern has a 1:1 relationship with aggregate roots**:
+
+- ❌ **Wrong**: `LocationRepository`, `ItemRepository` for individual entities
+- ✅ **Right**: `WorldRepository` for the World aggregate root
+
+**Repository loads the complete aggregate, aggregate root handles traversal**:
+
+**Python:**
+
+```python
+# ❌ Wrong: Repository provides entity-specific query methods
+class WorldRepository(ABC):
+    @abstractmethod
+    def find_location_by_sid(self, location_sid: Sid) -> Location | None:
+        pass
+
+    @abstractmethod
+    def find_starting_location(self) -> Location | None:
+        pass
+
+# ✅ Right: Repository loads aggregate, aggregate provides traversal
+class WorldRepository(ABC):
+    @abstractmethod
+    def get_world(self) -> World:
+        """Get the complete world aggregate with all locations loaded"""
+        pass
+
+# Aggregate root provides traversal methods
+class World:
+    def get_location(self, location_sid: Sid) -> Location | None:
+        return self._locations.get(location_sid)
+
+    def get_starting_location(self) -> Location | None:
+        return self._locations.get(self._starting_location_sid)
+```
+
+**TypeScript:**
+
+```typescript
+// ❌ Wrong: Repository provides entity-specific query methods
+interface WorldRepository {
+  findLocationBySid(locationSid: Sid): Promise<Location | null>;
+  findStartingLocation(): Promise<Location | null>;
+}
+
+// ✅ Right: Repository loads aggregate, aggregate provides traversal
+interface WorldRepository {
+  getWorld(): Promise<World>;
+}
+
+// Aggregate root provides traversal methods
+class World {
+  getLocation(locationSid: Sid): Location | null {
+    return this.locations.get(locationSid.value) || null;
+  }
+
+  getStartingLocation(): Location | null {
+    return this.locations.get(this.startingLocationSid.value) || null;
+  }
+}
+```
+
+**Java:**
+
+```java
+// ❌ Wrong: Repository provides entity-specific query methods
+public interface WorldRepository {
+    CompletableFuture<Optional<Location>> findLocationBySid(Sid locationSid);
+    CompletableFuture<Optional<Location>> findStartingLocation();
+}
+
+// ✅ Right: Repository loads aggregate, aggregate provides traversal
+public interface WorldRepository {
+    CompletableFuture<World> getWorld();
+}
+
+// Aggregate root provides traversal methods
+public class World {
+    public Optional<Location> getLocation(Sid locationSid) {
+        return Optional.ofNullable(locations.get(locationSid));
+    }
+
+    public Optional<Location> getStartingLocation() {
+        return Optional.ofNullable(locations.get(startingLocationSid));
+    }
+}
+```
+
+**C#:**
+
+```csharp
+// ❌ Wrong: Repository provides entity-specific query methods
+public interface IWorldRepository
+{
+    Task<Location?> FindLocationBySidAsync(Sid locationSid, CancellationToken cancellationToken = default);
+    Task<Location?> FindStartingLocationAsync(CancellationToken cancellationToken = default);
+}
+
+// ✅ Right: Repository loads aggregate, aggregate provides traversal
+public interface IWorldRepository
+{
+    Task<World> GetWorldAsync(CancellationToken cancellationToken = default);
+}
+
+// Aggregate root provides traversal methods
+public class World
+{
+    public Location? GetLocation(Sid locationSid)
+    {
+        return _locations.TryGetValue(locationSid, out var location) ? location : null;
+    }
+
+    public Location? GetStartingLocation()
+    {
+        return _locations.TryGetValue(_startingLocationSid, out var location) ? location : null;
+    }
+}
+```
+
+**Rust:**
+
+```rust
+// ❌ Wrong: Repository provides entity-specific query methods
+#[async_trait]
+pub trait WorldRepository: Send + Sync {
+    async fn find_location_by_sid(&self, location_sid: &Sid) -> Result<Option<Location>, DomainError>;
+    async fn find_starting_location(&self) -> Result<Option<Location>, DomainError>;
+}
+
+// ✅ Right: Repository loads aggregate, aggregate provides traversal
+#[async_trait]
+pub trait WorldRepository: Send + Sync {
+    async fn get_world(&self) -> Result<World, DomainError>;
+}
+
+// Aggregate root provides traversal methods
+impl World {
+    pub fn get_location(&self, location_sid: &Sid) -> Option<&Location> {
+        self.locations.get(location_sid)
+    }
+
+    pub fn get_starting_location(&self) -> Option<&Location> {
+        self.locations.get(&self.starting_location_sid)
+    }
+}
+```
+
+**Go:**
+
+```go
+// ❌ Wrong: Repository provides entity-specific query methods
+type WorldRepository interface {
+    FindLocationBySid(ctx context.Context, locationSid Sid) (*Location, error)
+    FindStartingLocation(ctx context.Context) (*Location, error)
+}
+
+// ✅ Right: Repository loads aggregate, aggregate provides traversal
+type WorldRepository interface {
+    GetWorld(ctx context.Context) (*World, error)
+}
+
+// Aggregate root provides traversal methods
+func (w *World) GetLocation(locationSid Sid) *Location {
+    return w.locations[locationSid]
+}
+
+func (w *World) GetStartingLocation() *Location {
+    return w.locations[w.startingLocationSid]
+}
+```
+
+#### Why This Pattern Matters
+
+**Aggregate Integrity**: The aggregate root maintains consistency and business rules across all entities within the aggregate boundary.
+
+**Performance**: Loading the complete aggregate once is more efficient than multiple entity queries.
+
+**Domain Clarity**: Traversal logic belongs in the domain layer (aggregate root), not infrastructure layer (repository).
+
+**Testing**: Easier to test domain behavior when aggregate handles its own traversal rather than depending on repository query methods.
+
+#### Implementation Guidelines
+
+1. **One Repository Per Aggregate**: Each aggregate root gets exactly one repository interface
+2. **Load Complete Aggregate**: Repository methods load all related entities within the aggregate boundary
+3. **Aggregate Handles Queries**: All entity lookup and traversal logic resides in the aggregate root
+4. **No Entity Repositories**: Individual entities within an aggregate do not get their own repositories
+
+#### Usage Example
+
+**Python:**
+
+```python
+# Use case gets aggregate from repository, then uses aggregate methods
+class StartGameUseCase:
+    def execute(self, command: StartGameCommand) -> StartGameResponse:
+        # Repository loads complete aggregate
+        world = self._world_repository.get_world()
+
+        # Aggregate root handles traversal
+        starting_location = world.get_starting_location()
+
+        # Domain logic continues...
+```
+
+**TypeScript:**
+
+```typescript
+// Use case gets aggregate from repository, then uses aggregate methods
+class StartGameUseCase {
+  async execute(command: StartGameCommand): Promise<StartGameResponse> {
+    // Repository loads complete aggregate
+    const world = await this.worldRepository.getWorld();
+
+    // Aggregate root handles traversal
+    const startingLocation = world.getStartingLocation();
+
+    // Domain logic continues...
+  }
+}
+```
+
+This pattern ensures proper separation of concerns and maintains aggregate boundaries as designed in Domain-Driven Design.
+
 ## Domain Event Rules
 
 ### 7. Domain Event Rules
