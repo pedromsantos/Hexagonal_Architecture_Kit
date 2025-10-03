@@ -57,19 +57,21 @@ Follow this exact sequence for each user story:
 
 ### Critical Test Distinctions
 
-**ACCEPTANCE TESTS** must cover **complete business flows**, not single operations:
+**ACCEPTANCE TESTS** test **complete use case execution**, not parts:
 
-- ❌ **Wrong**: Testing single use case execution with mocks (this is a unit test)
-- ✅ **Right**: Testing complete user journey with multiple API calls representing real user behavior
-- Example: Start game → Player created → Location assigned → Can view description → Ready to play
+- ❌ **Wrong**: Testing parts of use case with mocked repositories (this is a unit test)
+- ✅ **Right**: Testing COMPLETE use case with ALL adapters doubled (mocked or faked)
+- **CRITICAL**: Acceptance tests start at the **USE CASE boundary**, NOT HTTP controllers
+- **CRITICAL**: Acceptance tests use test doubles for ALL adapters (mocks/fakes for repositories AND external services) - focus on business logic, not persistence
+- **NOTE**: Use mocks (Mock library) or fakes (hand-made in-memory implementations) - whatever is simpler for the test
 
 **Test Boundaries and Responsibilities**:
 
-- **Unit Tests**: Single class/module, mock external dependencies, test domain behavior
-- **Integration Tests**: Adapter to external system, no mocks in boundary, test data transformation
-- **Contract Tests**: HTTP to use case, verify API contracts (status codes, headers, validation)
-- **Acceptance Tests**: Complete business flow, multiple operations, real user journey
-- **E2E Tests**: Full system, HTTP to database, test complete user workflows
+- **Unit Tests**: Test PARTS of use case (domain objects like User entity, Email value object) with test doubles for repositories
+- **Integration Tests**: Test adapter implementation with real external systems (real database, real APIs) - focus on persistence
+- **Contract Tests**: Test HTTP controllers for API contract compliance (status codes, headers, validation)
+- **Acceptance Tests**: Test COMPLETE use case with ALL adapters doubled (mocks or fakes) - focus on business logic correctness
+- **E2E Tests**: Test complete user journey through multiple use case executions with real infrastructure
 
 ### London School TDD Principles
 
