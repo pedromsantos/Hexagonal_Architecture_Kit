@@ -7,7 +7,7 @@ A comprehensive reference kit for implementing Domain Driven Design (DDD) with P
 This repository contains:
 
 - **[RULES.md](RULES.md)** - Complete implementation rules and guidelines with detailed code examples across multiple languages
-- **[CLAUDE_TEMPLATE.md](CLAUDE_TEMPLATE.md)** - Template AI assistant instructions for Test-Driven Development (TDD) and architectural best practices to copy to your projects
+- **[AI_PROMPT_TEMPLATE.md](AI_PROMPT_TEMPLATE.md)** - Template AI assistant instructions for Test-Driven Development (TDD) and architectural best practices to copy to your projects
 
 These files serve as reference materials that you can copy into your own projects to maintain consistent architectural patterns.
 
@@ -20,8 +20,8 @@ These files serve as reference materials that you can copy into your own project
 1. **Run `/init`** in your new project to generate a basic CLAUDE.md file
 2. **Copy [RULES.md](RULES.md)** into your project's root directory
 3. **Merge the architecture guidelines** into your generated CLAUDE.md:
-   - Open both your generated `CLAUDE.md` and this kit's [CLAUDE_TEMPLATE.md](CLAUDE_TEMPLATE.md)
-   - Copy these sections from CLAUDE_TEMPLATE.md into your CLAUDE.md:
+   - Open both your generated `CLAUDE.md` and this kit's [AI_PROMPT_TEMPLATE.md](AI_PROMPT_TEMPLATE.md)
+   - Copy these sections from AI_PROMPT_TEMPLATE.md into your CLAUDE.md:
      - `## Architecture Rules` (complete section)
      - `## TDD & Development Methodology` (complete section)
      - `## Aggregate-Repository Pattern & Traversal` (complete section)
@@ -29,7 +29,7 @@ These files serve as reference materials that you can copy into your own project
 
 #### If Adding to an Existing Project
 
-1. **Copy [CLAUDE_TEMPLATE.md](CLAUDE_TEMPLATE.md)** to your project as `CLAUDE.md` (or `.claude/CLAUDE.md`)
+1. **Copy [AI_PROMPT_TEMPLATE.md](AI_PROMPT_TEMPLATE.md)** to your project as `CLAUDE.md` (or `.claude/CLAUDE.md`)
 
    - Update the "Project Overview" section with your specific project details
    - All TDD and architecture guidelines are already included
@@ -38,7 +38,34 @@ These files serve as reference materials that you can copy into your own project
    - This provides detailed implementation rules and code examples
    - Referenced from your CLAUDE.md for easy lookup
 
-### Option 2: Manual Reference
+### Option 2: For Other AI Coding Assistants
+
+#### Using with Cursor
+
+1. **Copy [RULES.md](RULES.md)** into your project's root directory
+2. **Create `.cursorrules`** file in your project root
+3. **Copy the content** from [AI_PROMPT_TEMPLATE.md](AI_PROMPT_TEMPLATE.md) into `.cursorrules`
+4. Cursor will automatically read and follow these rules when assisting with code
+
+#### Using with GitHub Copilot
+
+1. **Copy [RULES.md](RULES.md)** into your project's root directory or `docs/` folder
+2. **Create a `CONTRIBUTING.md`** or add to your project's README:
+   - Reference the architectural patterns from RULES.md
+   - Include key principles in your documentation
+3. **Use Copilot Chat** with prompts like:
+   - "Follow the DDD patterns in RULES.md to create a User entity"
+   - "Implement this use case following the patterns in RULES.md"
+4. Copilot will use your project documentation as context
+
+#### Using with Windsurf
+
+1. **Copy [RULES.md](RULES.md)** into your project's root directory
+2. **Create `.windsurfrules`** file in your project root
+3. **Copy the content** from [AI_PROMPT_TEMPLATE.md](AI_PROMPT_TEMPLATE.md) into `.windsurfrules`
+4. Windsurf will automatically read and follow these rules when generating code
+
+### Option 3: Manual Reference
 
 Use this repository as a reference while coding:
 
@@ -50,7 +77,7 @@ Use this repository as a reference while coding:
 
 **Essential files to copy:**
 
-- `CLAUDE_TEMPLATE.md` → your project's `CLAUDE.md` - AI assistant instructions for TDD workflow
+- `AI_PROMPT_TEMPLATE.md` → your project's AI assistant config file (CLAUDE.md, .cursorrules, .windsurfrules, etc.)
 - `RULES.md` - Implementation rules and code examples
 
 **What NOT to copy:**
@@ -152,7 +179,7 @@ The [RULES.md](RULES.md) includes complete examples in:
 
 Recommended directory structure when using these patterns:
 
-```
+```txt
 your-project/
 ├── CLAUDE.md                 # AI instructions (copied from this kit)
 ├── RULES.md                  # Architecture rules (copied from this kit)
