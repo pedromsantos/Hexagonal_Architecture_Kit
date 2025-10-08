@@ -1,4 +1,4 @@
-# Hexagonal Architecture Kit
+# Hexagonal Architecture and Domain Driven Design (DDD) Kit
 
 A comprehensive reference kit for implementing Domain Driven Design (DDD) with Ports & Adapters (Hexagonal Architecture) and CQRS patterns in Python, TypeScript, Java, C#, Rust, and Go.
 
