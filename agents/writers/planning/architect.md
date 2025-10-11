@@ -140,24 +140,32 @@ DomainEvent → EventHandler
 
 **Follow London School TDD: Start from the outside (use case) and work inward**
 
-1. **Acceptance Test** (RED) - Complete use case with all adapters doubled (fakes/mocks)
-   - Often requires defining Infrastructure Port interfaces upfront for mocking
-2. **Infrastructure Ports** (Application needs: email, time, etc.) - Define interfaces early for test doubles
-3. **Use Case** (Command/Query Handler) - Application orchestration - START HERE
-4. **Domain Objects** (as needed by use case):
+1. **Acceptance Test Sketch** (RED) - Write test outline identifying needed ports and behavior
+   - Sketch expected behavior and outcomes
+   - Identify which ports will be needed (repositories, external services)
+   - Test will fail to compile until ports are defined
+2. **Infrastructure Port Interfaces** (CRITICAL: Define BEFORE test can run)
+   - EmailServicePort, TimeProviderPort, SmsServicePort, etc.
+   - Required to create test doubles (fakes/mocks) in acceptance test
+   - Without these, you cannot write `Mock(spec=EmailServicePort)`
+3. **Acceptance Test** (RED) - Complete test with all adapters doubled using fakes/mocks
+   - Now can create test doubles: `fake_user_repo`, `mock_email_service`
+   - Test executes but fails (behavior not implemented yet)
+4. **Use Case** (Command/Query Handler) - Application orchestration
+5. **Domain Objects** (as needed by use case):
+   - Value Objects (validation)
    - Aggregate Roots
    - Entities (internal to aggregates)
-   - Value Objects
    - Domain Events
-5. **Repository Interfaces** (Domain Ports) - Defined by domain needs
-6. **Integration Tests** for Driven Adapters
-7. **Repository Implementations** (Driven Adapters)
-8. **External Service Adapters** (Email, payment, etc.)
-9. **Driving Adapter** (Controller/API) - Only needed for contract tests or E2E
-10. **Contract Tests** - API endpoint contracts
-11. **E2E Tests** (optional) - Full system validation
+6. **Repository Interfaces** (Domain Ports) - Defined by domain needs
+7. **Integration Tests** for Driven Adapters
+8. **Repository Implementations** (Driven Adapters)
+9. **External Service Adapters** (Email, payment, etc.)
+10. **Driving Adapter** (Controller/API) - Only needed for contract tests or E2E
+11. **Contract Tests** - API endpoint contracts
+12. **E2E Tests** (optional) - Full system validation
 
-**Key Principle**: Write tests first (RED), implement to make them pass (GREEN), refactor. Start from the outside boundary and let the domain emerge from use case needs.
+**Key Principle**: Write tests first (RED), implement to make them pass (GREEN), refactor. Start from the outside boundary and let the domain emerge from use case needs. **Infrastructure ports must be defined early** so acceptance tests can create test doubles.
 ```
 
 ## Analysis Process
@@ -489,33 +497,41 @@ ORDER BY created_at DESC;
 
 **Following Pedro's Algorithm - London School TDD:**
 
-1. **Acceptance Test** (RED) - test_register_user_acceptance() with fakes for repositories and mocks for email
-2. **Infrastructure Ports** (needed for test doubles in acceptance test):
-   - EmailServicePort interface
-   - TimeProviderPort interface
-3. **RegisterUserUseCase** - Command handler orchestration - START THE REAL IMPLEMENTATION HERE
-4. **Domain Objects** (emerge from use case needs):
+1. **Acceptance Test Sketch** (RED) - Outline test_register_user_acceptance() identifying needed ports
+   - Sketch: User registers → User saved → Confirmation email sent
+   - Identify needed ports: UserRepository, EmailServicePort, TimeProviderPort
+   - Test fails to compile (ports don't exist yet)
+2. **Infrastructure Port Interfaces** (CRITICAL: Define BEFORE acceptance test can run)
+   - EmailServicePort interface (send_confirmation_email method)
+   - TimeProviderPort interface (now method)
+   - **Without these defined, cannot create test doubles in acceptance test!**
+3. **Acceptance Test** (RED) - Complete test_register_user_acceptance() with fakes/mocks
+   - Now can write: `fake_user_repo = FakeUserRepository()`
+   - Now can write: `mock_email_service = Mock(spec=EmailServicePort)`
+   - Test executes but fails (RegisterUserUseCase not implemented)
+4. **RegisterUserUseCase** - Command handler orchestration
+5. **Domain Objects** (emerge from use case needs):
    - Email value object (validation)
    - Password value object (validation)
    - UserId, ConfirmationToken value objects
    - User aggregate with business methods
    - UserRegistered, EmailConfirmed domain events
-5. **Repository Interfaces** (domain ports):
+6. **Repository Interfaces** (domain ports):
    - UserRepository interface
-6. **Integration Tests** - test_postgres_user_repository_integration()
-7. **Repository Implementations**:
+7. **Integration Tests** - test_postgres_user_repository_integration()
+8. **Repository Implementations**:
    - PostgresUserRepository (driven adapter)
    - PostgresUserProjectionRepository (for queries)
-8. **External Service Adapters**:
+9. **External Service Adapters**:
    - SmtpEmailService implementation
-9. **Query Side** (CQRS read):
-   - GetUserProfileQueryHandler
-   - ListActiveUsersQueryHandler
-10. **RestUserController** - POST /api/users/register endpoint (driving adapter) - ONLY FOR CONTRACT TESTS
-11. **Contract Tests** - API endpoint contracts
-12. **E2E Tests** (optional) - Full system validation
+10. **Query Side** (CQRS read):
+    - GetUserProfileQueryHandler
+    - ListActiveUsersQueryHandler
+11. **RestUserController** - POST /api/users/register endpoint (driving adapter) - ONLY FOR CONTRACT TESTS
+12. **Contract Tests** - API endpoint contracts
+13. **E2E Tests** (optional) - Full system validation
 
-**Remember**: Start with failing acceptance test, work from outside in, let domain emerge from real needs.
+**Remember**: Start with failing acceptance test sketch, define infrastructure ports EARLY for test doubles, then work from outside in letting domain emerge from real needs.
 
 ## Decision Guidelines
 
