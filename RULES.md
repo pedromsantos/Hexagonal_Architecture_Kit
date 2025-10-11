@@ -2448,6 +2448,7 @@ test("Complete user registration journey") {
 9. **Contract Verification**: Contract tests ensure API consistency
 10. **Boundary Clarity**: Each test type has a clear scope
 11. **Resposability Clarity**: Each tests has a clear responsability
+12. **Scope Creep Guardian**: When implementing functionality, always ask "Is this required for the current story?" Features from future stories should be explicitly excluded to maintain focus and prevent premature complexity
 
 #### Golden Rule
 

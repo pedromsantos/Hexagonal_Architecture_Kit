@@ -137,6 +137,54 @@ User Context: "Testing agent effectiveness"
 
 ## Integration with Other Agents
 
+### Mandatory Invocation Protocol
+
+**CRITICAL: The Scope Guardian MUST be consulted after EVERY agent interaction that suggests code changes.**
+
+#### Automatic Checkpoint Triggers
+
+🔄 **After Technical Agent Calls** - Immediately review suggestions through YAGNI lens
+🔄 **After Implementation Agent Calls** - Verify scope boundaries weren't violated
+🔄 **After Architecture Agent Calls** - Challenge architectural additions
+🔄 **After Code Generation** - Ensure only requested features were added
+
+#### Pre-Implementation Gate
+
+Before any code change implementation:
+
+```text
+🛑 SCOPE GUARDIAN CHECKPOINT
+❓ Does this change serve the current story/objective?
+❓ Did the user explicitly request this functionality?
+❓ Are we adding infrastructure for simple domain changes?
+❓ Can we achieve the goal with less complexity?
+
+✅ PROCEED only if all answers align with user's explicit request
+❌ HALT if scope creep detected - escalate to user for clarification
+```
+
+#### Invocation Examples
+
+**After Domain Expert Agent suggests adding CQRS:**
+
+```text
+🛑 SCOPE GUARDIAN REVIEW:
+- User asked: "Move validation to domain entity"
+- Agent suggested: Domain validation + CQRS query handlers + event sourcing
+- VERDICT: SCOPE CREEP - Only domain validation was requested
+- ACTION: Implement only validation move, suggest CQRS as separate task
+```
+
+**After Implementation Agent adds extra methods:**
+
+```text
+🛑 SCOPE GUARDIAN REVIEW:
+- User asked: "Add location_sid to Player constructor"
+- Agent added: location_sid + bag + is_active + movement methods
+- VERDICT: PARTIAL SCOPE CREEP - Movement methods not in current story
+- ACTION: Keep location_sid/bag/is_active, remove movement (Story 2)
+```
+
 ### Before Consulting Technical Agents
 
 1. **Confirm scope boundaries** with user
@@ -155,7 +203,7 @@ Challenge their suggestions through YAGNI lens:
 
 Always include scope decisions in responses:
 
-```
+```txt
 🎯 Scope Decision: Kept change minimal - only moved validation to domain
 🚫 Scope Avoided: Didn't add query handlers (not requested, can add later)
 ✅ Objective Met: Validation now properly in domain layer

@@ -116,13 +116,25 @@ FOR EACH SLICE:
      - Test COMPLETE business flow
      - Use test doubles for ALL adapters
      - Test should FAIL for the right reason
+     **MANDATORY**: scope_guardian → Review implementation for scope creep
+        - Verify only requested functionality was added
+        - Challenge any infrastructure added beyond accceptance test needs
+        - Escalate scope violations to user for clarification
 
   3. WHILE acceptance test RED:
      a. unit_test_writer → Write failing unit test (RED)
+     **MANDATORY**: scope_guardian → Review implementation for scope creep
+        - Verify only requested functionality was added
+        - Challenge any infrastructure added beyond domain needs
+        - Escalate scope violations to user for clarification
      b. Implementation agents → Implement behavior
         - aggregate_implementer (for domain objects)
         - domain_service_implementer (for cross-aggregate logic)
         - command_handler_implementer OR query_handler_implementer (for use cases)
+     🛡️ **MANDATORY**: scope_guardian → Review implementation for scope creep
+        - Verify only requested functionality was added
+        - Challenge any infrastructure added beyond acceptance or unit test needs
+        - Escalate scope violations to user for clarification
      c. Run tests → GREEN
      d. Refactor if needed (keep tests GREEN)
      e. Commit on GREEN
@@ -130,12 +142,21 @@ FOR EACH SLICE:
 
   4. integration_test_writer → Test driven adapters
   5. repository_implementer → Implement repositories
+  🛡️ **MANDATORY**: scope_guardian → Review infrastructure additions
+        - Ensure only necessary adapters were implemented
+        - Verify no over-engineering of data access patterns
   6. database_migration_writer → Create migrations
+     **MANDATORY**: scope_guardian → Review database additions
+        - Ensure only necessary database structures were implemented
+        - Verify no over-engineering of data structures
   7. Run tests → GREEN
   8. Commit on GREEN
 
   9. contract_test_writer → Test driving adapters
   10. driving_adapter_implementer → Implement controllers
+  🛡️ **MANDATORY**: scope_guardian → Review controller implementations
+        - Verify only required endpoints were added
+        - Check for feature creep in API design
   11. Run tests → GREEN
   12. Commit on GREEN
 
@@ -287,6 +308,39 @@ Tests: All unit tests passing
 - ✅ RIGHT: SID provided by external caller in command
 
 ## Agent Coordination
+
+### Scope Guardian Integration Protocol
+
+#### Mandatory Consultation Rule
+
+The scope_guardian MUST be consulted after EVERY implementation agent call.
+
+#### Automatic Checkpoints
+
+After any of these agent interactions:
+
+- aggregate_implementer
+- domain_service_implementer
+- command_handler_implementer
+- query_handler_implementer
+- repository_implementer
+- driving_adapter_implementer
+
+#### Scope Guardian Questions
+
+```text
+🛑 SCOPE CHECKPOINT:
+❓ Does this implementation serve only the current user story?
+❓ Are we adding features from future stories?
+❓ Did we add infrastructure complexity beyond requirements?
+❓ Can we achieve the same goal with simpler means?
+```
+
+#### Actions Based on Scope Guardian Verdict
+
+- ✅ **PROCEED**: Implementation aligns with current story scope
+- ⚠️ **MODIFY**: Remove scope creep, keep only necessary changes
+- 🚫 **ESCALATE**: Ask user to clarify scope boundaries
 
 ### Planning Phase Agents (Conditional Usage)
 
