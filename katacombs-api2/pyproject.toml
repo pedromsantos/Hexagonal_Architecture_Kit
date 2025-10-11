@@ -35,18 +35,18 @@ build-backend = "uv_build"
 [tool.ruff.lint]
 select = ["ALL"]
 ignore = [
-    "E501", # line too long, handled by black
-    "B008", # do not perform function calls in argument defaults
-    "C901", # too complex
+    "E501",   # line too long, handled by black
+    "B008",   # do not perform function calls in argument defaults
+    "C901",   # too complex
     "COM812", # conflicts with formatter
-    "D100", # missing docstring in public module
-    "D101", # missing docstring in public class
-    "D102", # missing docstring in public method
-    "D103", # missing docstring in public function
-    "D104", # missing docstring in public package
-    "D105", # missing docstring in public module
-    "D203", # conflicts with D211
-    "D213", # conflicts with D212
+    "D100",   # missing docstring in public module
+    "D101",   # missing docstring in public class
+    "D102",   # missing docstring in public method
+    "D103",   # missing docstring in public function
+    "D104",   # missing docstring in public package
+    "D105",   # missing docstring in public module
+    "D203",   # conflicts with D211
+    "D213",   # conflicts with D212
 ]
 [tool.ruff.lint.per-file-ignores]
 "tests/**/*.py" = ["S101", "PLR2004", "D", "ANN"]
