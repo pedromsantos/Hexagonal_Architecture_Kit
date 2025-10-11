@@ -57,6 +57,21 @@ Implement complete aggregates with proper boundaries, invariant enforcement, enc
 ## Implementation Template
 
 ```python
+from dataclasses import dataclass, field
+from datetime import datetime
+from typing import List, Dict, Any, Optional
+
+# Memento for persistence (see repository.md for memento pattern details)
+@dataclass(frozen=True)
+class [Aggregate]Snapshot:
+    """Memento containing aggregate's state for persistence"""
+    aggregate_id: str
+    [aggregate_fields]: Any
+    [internal_entities]: List[Dict[str, Any]]  # Serialized as primitives
+    version: int
+    created_at: str
+    updated_at: str
+
 @dataclass
 class [AggregateRoot]:  # Aggregate Root Entity
     # GLOBAL IDENTITY (Rule 1)
@@ -71,6 +86,12 @@ class [AggregateRoot]:  # Aggregate Root Entity
     # STATE
     _[state_fields]: [Type] = field(default=...)
 
+    # VERSION FOR OPTIMISTIC CONCURRENCY
+    _version: int = field(default=0, init=False)
+
+    # TIMESTAMPS
+    _created_at: datetime = field(default_factory=datetime.now, init=False)
+
     def __post_init__(self):
         self._validate_all_invariants()
 
@@ -82,6 +103,7 @@ class [AggregateRoot]:  # Aggregate Root Entity
 
         # State change
         self._[modify_state](params)
+        self._version += 1  # Increment version for concurrency control
 
         # RULE 9: Validate all invariants after change
         self._validate_all_invariants()
@@ -110,6 +132,55 @@ class [AggregateRoot]:  # Aggregate Root Entity
     @property
     def id(self) -> [RootId]:
         return self._id
+
+    @property
+    def version(self) -> int:
+        return self._version
+
+    # MEMENTO PATTERN - For persistence (see repository.md)
+    def create_snapshot(self) -> [Aggregate]Snapshot:
+        """Create memento for persistence - preserves encapsulation"""
+        return [Aggregate]Snapshot(
+            aggregate_id=self._id.value,
+            [field]=self._[field],
+            [internal_entities]=[
+                {
+                    'local_id': entity.local_id.value,
+                    '[entity_field]': entity.[entity_field],
+                    # Serialize all entity state as primitives
+                }
+                for entity in self._[internal_entities]
+            ],
+            version=self._version,
+            created_at=self._created_at.isoformat(),
+            updated_at=datetime.now().isoformat()
+        )
+
+    @classmethod
+    def restore_from_snapshot(cls, snapshot: [Aggregate]Snapshot) -> '[AggregateRoot]':
+        """Restore aggregate from memento - maintains invariants"""
+        # Restore internal entities
+        internal_entities = [
+            [InternalEntity](
+                local_id=[LocalId](entity_data['local_id']),
+                [entity_field]=entity_data['[entity_field]'],
+                # Restore all entity fields
+            )
+            for entity_data in snapshot.[internal_entities]
+        ]
+
+        # Create instance without running __init__ validation
+        aggregate = cls.__new__(cls)
+        aggregate._id = [RootId](snapshot.aggregate_id)
+        aggregate._[field] = snapshot.[field]
+        aggregate._[internal_entities] = internal_entities
+        aggregate._version = snapshot.version
+        aggregate._created_at = datetime.fromisoformat(snapshot.created_at)
+
+        # Validate restored state
+        aggregate._validate_all_invariants()
+
+        return aggregate
 
     # INVARIANT ENFORCEMENT (Rule 9)
     def _validate_all_invariants(self) -> None:
@@ -158,12 +229,29 @@ class [InternalEntity]:
 ## Complete Example: Order Aggregate
 
 ```python
+from datetime import datetime
+from dataclasses import dataclass, field
+from typing import List, Dict, Any, Optional
+
+# Memento for persistence (see repository.md for full memento pattern details)
+@dataclass(frozen=True)
+class OrderSnapshot:
+    """Memento containing aggregate's state for persistence"""
+    aggregate_id: str
+    customer_id: str
+    status: str
+    line_items: List[Dict[str, Any]]
+    version: int
+    created_at: str
+    updated_at: str
+
 @dataclass
 class Order:  # Aggregate Root
     _id: OrderId
     _customer_id: CustomerId
     _line_items: list[OrderLineItem] = field(default_factory=list, init=False)
     _status: OrderStatus = field(default=OrderStatus.PENDING, init=False)
+    _version: int = field(default=0, init=False)
     _created_at: datetime = field(default_factory=datetime.now, init=False)
 
     @staticmethod
@@ -185,6 +273,7 @@ class Order:  # Aggregate Root
         # State change
         line_item = OrderLineItem(product_id, quantity, unit_price)
         self._line_items.append(line_item)
+        self._version += 1  # Optimistic concurrency control
 
     def confirm(self) -> OrderConfirmed:
         # Business rules
@@ -195,6 +284,7 @@ class Order:  # Aggregate Root
 
         # State change
         self._status = OrderStatus.CONFIRMED
+        self._version += 1
 
         # Domain event
         return OrderConfirmed(self._id, self.total(), datetime.now())
@@ -221,6 +311,74 @@ class Order:  # Aggregate Root
     @property
     def status(self) -> OrderStatus:
         return self._status
+
+    @property
+    def version(self) -> int:
+        return self._version
+
+    # MEMENTO PATTERN - For persistence (see repository.md)
+    def create_snapshot(self) -> OrderSnapshot:
+        """Create memento for persistence - preserves encapsulation"""
+        return OrderSnapshot(
+            aggregate_id=self._id.value,
+            customer_id=self._customer_id.value,
+            status=self._status.value,
+            line_items=[
+                {
+                    'product_id': item.product_id.value,
+                    'quantity': item.quantity,
+                    'unit_price_amount': str(item.unit_price.amount),
+                    'unit_price_currency': item.unit_price.currency
+                }
+                for item in self._line_items
+            ],
+            version=self._version,
+            created_at=self._created_at.isoformat(),
+            updated_at=datetime.now().isoformat()
+        )
+
+    @classmethod
+    def restore_from_snapshot(cls, snapshot: OrderSnapshot) -> 'Order':
+        """Restore aggregate from memento - maintains invariants"""
+        # Restore line items
+        line_items = [
+            OrderLineItem(
+                product_id=ProductId(item_data['product_id']),
+                quantity=item_data['quantity'],
+                unit_price=Money(
+                    amount=Decimal(item_data['unit_price_amount']),
+                    currency=item_data['unit_price_currency']
+                )
+            )
+            for item_data in snapshot.line_items
+        ]
+
+        # Create instance without running __init__ validation
+        order = cls.__new__(cls)
+        order._id = OrderId(snapshot.aggregate_id)
+        order._customer_id = CustomerId(snapshot.customer_id)
+        order._status = OrderStatus(snapshot.status)
+        order._line_items = line_items
+        order._version = snapshot.version
+        order._created_at = datetime.fromisoformat(snapshot.created_at)
+
+        # Validate restored state
+        order._validate_all_invariants()
+
+        return order
+
+    def _validate_all_invariants(self) -> None:
+        """Validate all business rules across entire aggregate"""
+        # Aggregate-level invariants
+        if not self._line_items and self._status == OrderStatus.CONFIRMED:
+            raise ValueError("Cannot have confirmed order without line items")
+
+        # Internal entity invariants
+        for item in self._line_items:
+            if item.quantity <= 0:
+                raise ValueError("Line item quantity must be positive")
+            if item.unit_price.amount < 0:
+                raise ValueError("Line item price cannot be negative")
 
 
 # Internal Entity
@@ -414,6 +572,14 @@ Validate across entire aggregate on every change
 ### 8. Reference Other Aggregates by ID
 
 Store identifiers, not direct entity references
+
+### 9. Implement Memento Pattern
+
+Add `create_snapshot()` and `restore_from_snapshot()` for persistence without breaking encapsulation (see `repository.md`)
+
+### 10. Include Version Control
+
+Add `_version` field for optimistic concurrency control in multi-user scenarios
 
 ## Vernon's Aggregate Design Checklist
 
