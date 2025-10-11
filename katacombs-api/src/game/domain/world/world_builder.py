@@ -13,18 +13,36 @@ class WorldBuilder:
 
     Encapsulates all world creation logic and business rules.
     Provides methods to build different types of worlds (starter, full, custom).
+
+    IMPORTANT: All SIDs must be provided by external systems.
+    The domain does not generate IDs - this is an infrastructure concern.
     """
 
     def __init__(self) -> None:
         self._locations: dict[Sid, Location] = {}
         self._starting_location_sid: Sid | None = None
 
-    def create_starter_world(self) -> World:
-        """Create the default starter world with entrance hall and basic setup"""
+    def create_starter_world(
+        self,
+        entrance_sid: Sid,
+        north_corridor_sid: Sid,
+        east_chamber_sid: Sid,
+        torch_sid: Sid,
+    ) -> World:
+        """Create the default starter world with entrance hall and basic setup
+
+        Args:
+            entrance_sid: SID for the entrance hall location (provided by external system)
+            north_corridor_sid: SID for the north corridor location (provided by external system)
+            east_chamber_sid: SID for the east chamber location (provided by external system)
+            torch_sid: SID for the torch item (provided by external system)
+
+        Returns:
+            The constructed starter world
+        """
         self._clear()
 
         # Create the entrance hall (starting location)
-        entrance_sid = Sid.generate()
         entrance_description = (
             "You are in the entrance hall of the ancient Katacombs. "
             "Torches flicker on the stone walls, casting dancing shadows. "
@@ -33,13 +51,11 @@ class WorldBuilder:
         entrance_location = Location(sid=entrance_sid, description=entrance_description)
 
         # Create connected locations
-        north_corridor_sid = Sid.generate()
         north_corridor = Location(
             sid=north_corridor_sid,
             description="A narrow stone corridor extends to the north. The walls are carved with ancient symbols."
         )
 
-        east_chamber_sid = Sid.generate()
         east_chamber = Location(
             sid=east_chamber_sid,
             description="A small chamber with a low ceiling. Water drips steadily from somewhere above."
@@ -53,7 +69,7 @@ class WorldBuilder:
 
         # Add starting items
         torch = Item(
-            sid=Sid.generate(),
+            sid=torch_sid,
             name="Torch",
             description="A flickering torch that provides light in the darkness",
             available_actions=[Action.PICK, Action.USE],

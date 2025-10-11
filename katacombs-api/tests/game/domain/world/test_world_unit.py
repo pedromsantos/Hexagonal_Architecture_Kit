@@ -2,6 +2,7 @@ import pytest
 
 from src.game.domain.player import Sid
 from src.game.domain.world import Location, World
+from src.game.infrastructure.sid_generator import SidGenerator
 
 
 class TestWorld:
@@ -11,7 +12,7 @@ class TestWorld:
 
     def test_world_can_be_created_with_locations_and_starting_location(self):
         # Arrange
-        location_sid = Sid.generate()
+        location_sid = SidGenerator.generate()
         location = Location(location_sid, "Test location")
         locations = {location_sid: location}
 
@@ -25,8 +26,8 @@ class TestWorld:
 
     def test_world_validates_starting_location_exists(self):
         # Arrange
-        location_sid = Sid.generate()
-        invalid_starting_sid = Sid.generate()
+        location_sid = SidGenerator.generate()
+        invalid_starting_sid = SidGenerator.generate()
         location = Location(location_sid, "Test location")
         locations = {location_sid: location}
 
@@ -36,7 +37,7 @@ class TestWorld:
 
     def test_get_starting_location_returns_correct_location(self):
         # Arrange
-        location_sid = Sid.generate()
+        location_sid = SidGenerator.generate()
         location = Location(location_sid, "Starting location")
         locations = {location_sid: location}
         world = World(locations, location_sid)
@@ -50,8 +51,8 @@ class TestWorld:
 
     def test_get_location_returns_none_for_nonexistent_location(self):
         # Arrange
-        location_sid = Sid.generate()
-        nonexistent_sid = Sid.generate()
+        location_sid = SidGenerator.generate()
+        nonexistent_sid = SidGenerator.generate()
         location = Location(location_sid, "Test location")
         locations = {location_sid: location}
         world = World(locations, location_sid)
@@ -64,7 +65,7 @@ class TestWorld:
 
     def test_has_location_returns_true_for_existing_location(self):
         # Arrange
-        location_sid = Sid.generate()
+        location_sid = SidGenerator.generate()
         location = Location(location_sid, "Test location")
         locations = {location_sid: location}
         world = World(locations, location_sid)
@@ -74,8 +75,8 @@ class TestWorld:
 
     def test_has_location_returns_false_for_nonexistent_location(self):
         # Arrange
-        location_sid = Sid.generate()
-        nonexistent_sid = Sid.generate()
+        location_sid = SidGenerator.generate()
+        nonexistent_sid = SidGenerator.generate()
         location = Location(location_sid, "Test location")
         locations = {location_sid: location}
         world = World(locations, location_sid)
@@ -85,7 +86,7 @@ class TestWorld:
 
     def test_get_all_locations_returns_defensive_copy(self):
         # Arrange
-        location_sid = Sid.generate()
+        location_sid = SidGenerator.generate()
         location = Location(location_sid, "Test location")
         locations = {location_sid: location}
         world = World(locations, location_sid)
@@ -103,7 +104,7 @@ class TestWorld:
 
     def test_world_creates_defensive_copy_of_input_locations(self):
         # Arrange
-        location_sid = Sid.generate()
+        location_sid = SidGenerator.generate()
         location = Location(location_sid, "Test location")
         original_locations = {location_sid: location}
         world = World(original_locations, location_sid)
@@ -117,9 +118,9 @@ class TestWorld:
 
     def test_world_with_multiple_locations(self):
         # Arrange
-        location1_sid = Sid.generate()
-        location2_sid = Sid.generate()
-        location3_sid = Sid.generate()
+        location1_sid = SidGenerator.generate()
+        location2_sid = SidGenerator.generate()
+        location3_sid = SidGenerator.generate()
 
         location1 = Location(location1_sid, "First location")
         location2 = Location(location2_sid, "Second location")

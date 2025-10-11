@@ -3,8 +3,8 @@ from fastapi.testclient import TestClient
 from src.game.infrastructure.adapters.fastapi_app import create_app
 
 
-class TestStartGameAcceptance:
-    """ACCEPTANCE TEST: Full Business Flow
+class TestStartGameE2EBusinessFlow:
+    """E2E BUSINESS FLOW TEST: Complete Start Game User Journey
     "As a player, I want to start a new game so that I can begin playing Katacombs"
 
     This test covers the complete business flow:
@@ -14,7 +14,8 @@ class TestStartGameAcceptance:
     4. Player can see location description, exits, and available items
     5. Player can view their empty bag (GET /player/{playerSid}/bag)
 
-    This is a REAL acceptance test covering multiple API calls and the complete user journey.
+    This is an E2E business flow test covering multiple API calls and the complete user journey.
+    Tests the system from HTTP layer to infrastructure layer.
     """
 
     def test_complete_start_game_business_flow(self):
@@ -84,5 +85,5 @@ class TestStartGameAcceptance:
         # - Ready to begin playing the adventure game ✅
 
 
-# This acceptance test covers the COMPLETE business flow, not just a single unit of work
-# It validates the entire user journey from game creation to being ready to play
+# This E2E business flow test covers the COMPLETE user journey, not just a single operation
+# It validates the entire flow from game creation to being ready to play

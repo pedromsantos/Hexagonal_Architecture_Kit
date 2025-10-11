@@ -3,8 +3,11 @@ from typing import Annotated, cast
 from fastapi import Depends, FastAPI, HTTPException
 from pydantic import BaseModel
 
-from ...application.dtos.start_game_dto import PlayerData, StartGameCommand
-from ...application.use_cases.start_game import StartGameUseCase
+from ...application.commands import (
+    PlayerData,
+    StartGameCommand,
+    StartGameCommandHandler,
+)
 from ...infrastructure.repositories.in_memory_player_repository import InMemoryPlayerRepository
 from ...infrastructure.repositories.in_memory_world_repository import InMemoryWorldRepository
 
@@ -42,12 +45,12 @@ def _raise_server_error(message: str) -> None:
 
 
 def _execute_start_game_command(
-    use_case: StartGameUseCase, request: StartGameRequest
+    command_handler: StartGameCommandHandler, request: StartGameRequest
 ) -> PlayerResponse:
     """Execute start game command and return response"""
     _validate_request(request)
     command = StartGameCommand(player_name=request.name, player_sid=request.sid)
-    result = use_case.execute(command)
+    result = command_handler.execute(command)
 
     if not result.success:
         _raise_error_response(result.error_message or "Unknown error")
@@ -82,22 +85,22 @@ def _convert_player_data_to_response(player_data: PlayerData) -> PlayerResponse:
     )
 
 
-def get_start_game_use_case() -> StartGameUseCase:
-    """Dependency injection for start game use case"""
+def get_start_game_command_handler() -> StartGameCommandHandler:
+    """Dependency injection for start game command handler"""
     player_repo = InMemoryPlayerRepository()
     world_repo = InMemoryWorldRepository()
-    return StartGameUseCase(player_repo, world_repo)
+    return StartGameCommandHandler(player_repo, world_repo)
 
 
 async def start_game(
     request: StartGameRequest,
-    use_case: Annotated[StartGameUseCase, Depends(get_start_game_use_case)],
+    command_handler: Annotated[StartGameCommandHandler, Depends(get_start_game_command_handler)],
 ) -> PlayerResponse:
     """Start a new game with a new player
     Driving adapter - converts HTTP requests to domain commands
     """
     try:
-        return _execute_start_game_command(use_case, request)
+        return _execute_start_game_command(command_handler, request)
     except HTTPException:
         raise
     except ValueError as e:

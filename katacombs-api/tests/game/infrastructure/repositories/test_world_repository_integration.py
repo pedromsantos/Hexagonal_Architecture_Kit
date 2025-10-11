@@ -3,6 +3,7 @@ from src.game.domain.world import Action, Direction, Item, Location, World, Worl
 from src.game.infrastructure.repositories.in_memory_world_repository import (
     InMemoryWorldRepository,
 )
+from src.game.infrastructure.sid_generator import SidGenerator
 
 
 class TestWorldRepository:
@@ -13,13 +14,13 @@ class TestWorldRepository:
     def test_repository_with_custom_world(self):
         # Arrange - Create a custom world with known locations
         builder = WorldBuilder()
-        test_location_sid = Sid.generate()
+        test_location_sid = SidGenerator.generate()
         test_location = Location(test_location_sid, "A test room")
 
         # Add item and exit to test location
-        item = Item(Sid.generate(), "Key", "A rusty key", [Action.PICK])
+        item = Item(SidGenerator.generate(), "Key", "A rusty key", [Action.PICK])
         test_location.add_item(item)
-        test_location.add_exit(Direction.NORTH, Sid.generate())
+        test_location.add_exit(Direction.NORTH, SidGenerator.generate())
 
         builder.add_location(test_location)
         builder.set_starting_location(test_location_sid)
@@ -55,7 +56,7 @@ class TestWorldRepository:
     def test_find_starting_location_with_custom_world(self):
         # Arrange - Create custom world with known starting location
         builder = WorldBuilder()
-        starting_sid = Sid.generate()
+        starting_sid = SidGenerator.generate()
         starting_location = Location(starting_sid, "Custom starting room")
 
         builder.add_location(starting_location)

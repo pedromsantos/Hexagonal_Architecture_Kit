@@ -5,22 +5,29 @@ from .sid import Sid
 
 
 class PlayerRepository(ABC):
-    """Driven Port - Repository interface for Player aggregate
-    This belongs in the domain layer as it represents a domain concept
+    """Driven Port - Write-side repository interface for Player aggregate
+
+    This belongs in the domain layer as it represents a domain concept.
+
+    IMPORTANT: This is a WRITE-SIDE repository for command operations only.
+    For read operations (queries), use PlayerProjectionRepository instead.
     """
 
     @abstractmethod
     def save(self, player: Player) -> None:
+        """Persist player changes after command execution"""
         pass
 
     @abstractmethod
     def find_by_sid(self, player_sid: Sid) -> Player | None:
-        pass
+        """Load player aggregate for COMMAND operations only.
 
-    @abstractmethod
-    def find_all_active(self) -> list[Player]:
+        Use this ONLY when you need to execute domain behavior.
+        For read-only queries, use PlayerProjectionRepository.
+        """
         pass
 
     @abstractmethod
     def delete(self, player_sid: Sid) -> bool:
+        """Remove player from persistence"""
         pass

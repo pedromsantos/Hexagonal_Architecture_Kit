@@ -1,6 +1,6 @@
 from ...domain.player import Bag, Player, PlayerRepository, Sid
 from ...domain.world import WorldRepository
-from ..dtos.start_game_dto import (
+from .start_game_dto import (
     BagData,
     ItemData,
     LocationData,
@@ -10,10 +10,14 @@ from ..dtos.start_game_dto import (
 )
 
 
-class StartGameUseCase:
-    """Use Case - Start a new game
-    Orchestrates the creation of a new player and places them in the starting location
-    Contains NO business logic - only orchestration
+class StartGameCommandHandler:
+    """Command Handler - Start a new game (WRITE-SIDE)
+
+    Orchestrates the creation of a new player and places them in the starting location.
+    Contains NO business logic - only orchestration.
+
+    IMPORTANT: This is a COMMAND handler for write operations.
+    For read operations (queries), use query handlers.
     """
 
     def __init__(
@@ -27,22 +31,20 @@ class StartGameUseCase:
     def execute(self, command: StartGameCommand) -> StartGameResponse:
         """Execute the start game use case"""
         try:
-            # Get the world and find starting location through the aggregate
             world = self._world_repository.get_world()
             starting_location = world.get_starting_location()
             if not starting_location:
                 return StartGameResponse.error_response("No starting location found")
 
-            # Create a new player with provided SID (domain logic is in the Player.create method)
-            player_sid = Sid(command.player_sid)  # Validate the provided SID
+            player_sid = Sid(command.player_sid)
             empty_bag = Bag()
-            player = Player.create(player_sid, command.player_name, starting_location, empty_bag)
+            player = Player.create(
+                player_sid, command.player_name, starting_location.sid, empty_bag
+            )
 
-            # Save the player
             self._player_repository.save(player)
 
-            # Convert domain objects to response data
-            player_data = self._convert_player_to_data(player)
+            player_data = self._convert_player_to_data(player, world)
             return StartGameResponse.success_response(player_data)
 
         except ValueError as e:
@@ -51,31 +53,40 @@ class StartGameUseCase:
             error_msg = f"Failed to start game: {e!s}"
             return StartGameResponse.error_response(error_msg)
 
-    def _convert_player_to_data(self, player: Player) -> PlayerData:
-        """Convert domain Player to PlayerData DTO"""
-        # Convert location items to ItemData
+    def _convert_player_to_data(self, player: Player, world) -> PlayerData:
+        """Convert domain Player to PlayerData DTO
+
+        Args:
+            player: The Player aggregate
+            world: The World aggregate (needed to fetch location and item details)
+        """
+
+        location = world.get_location(player.location_sid)
+        if not location:
+            msg = f"Location not found for player: {player.location_sid}"
+            raise ValueError(msg)
+
         location_items = [
             ItemData(sid=str(item.sid.value), name=item.name, description=item.description)
-            for item in player.location.items
+            for item in location.items
         ]
 
-        # Convert location to LocationData
         location_data = LocationData(
-            description=player.location.description,
-            exits=[direction.value for direction in player.location.get_available_directions()],
+            description=location.description,
+            exits=[direction.value for direction in location.get_available_directions()],
             items=location_items,
         )
 
-        # Convert bag items to ItemData
-        bag_items = [
-            ItemData(sid=str(item.sid.value), name=item.name, description=item.description)
-            for item in player.bag.items
-        ]
+        bag_items = []
+        for item_sid in player.bag.item_sids:
+            item = world.get_item_by_sid(item_sid)
+            if item:
+                bag_items.append(
+                    ItemData(sid=str(item.sid.value), name=item.name, description=item.description)
+                )
 
-        # Convert bag to BagData
         bag_data = BagData(items=bag_items)
 
-        # Convert player to PlayerData
         return PlayerData(
             sid=str(player.sid.value), name=player.name, location=location_data, bag=bag_data
         )

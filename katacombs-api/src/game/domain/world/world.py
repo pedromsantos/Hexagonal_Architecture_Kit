@@ -39,3 +39,11 @@ class World:
     def has_location(self, location_sid: Sid) -> bool:
         """Check if a location exists in the world"""
         return location_sid in self._locations
+
+    def get_item_by_sid(self, item_sid: Sid):
+        """Get an item by its SID from any location in the world"""
+        for location in self._locations.values():
+            for item in location.items:
+                if item.sid == item_sid:
+                    return item
+        return None

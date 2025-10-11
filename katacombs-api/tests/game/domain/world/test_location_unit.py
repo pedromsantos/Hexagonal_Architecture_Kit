@@ -2,6 +2,7 @@ import pytest
 
 from src.game.domain.player import Sid
 from src.game.domain.world import Action, Direction, Item, Location
+from src.game.infrastructure.sid_generator import SidGenerator
 
 
 class TestLocation:
@@ -11,7 +12,7 @@ class TestLocation:
 
     def test_location_can_be_created_with_valid_data(self):
         # Arrange
-        location_sid = Sid.generate()
+        location_sid = SidGenerator.generate()
         description = "A mysterious chamber"
 
         # Act
@@ -25,7 +26,7 @@ class TestLocation:
 
     def test_location_cannot_be_created_with_empty_description(self):
         # Arrange
-        location_sid = Sid.generate()
+        location_sid = SidGenerator.generate()
         empty_description = ""
 
         # Act & Assert
@@ -34,7 +35,7 @@ class TestLocation:
 
     def test_location_cannot_be_created_with_whitespace_only_description(self):
         # Arrange
-        location_sid = Sid.generate()
+        location_sid = SidGenerator.generate()
         whitespace_description = "   \t\n   "
 
         # Act & Assert
@@ -43,8 +44,8 @@ class TestLocation:
 
     def test_add_exit_creates_connection_to_destination(self):
         # Arrange
-        location_sid = Sid.generate()
-        destination_sid = Sid.generate()
+        location_sid = SidGenerator.generate()
+        destination_sid = SidGenerator.generate()
         location = Location(location_sid, "Starting room")
 
         # Act
@@ -55,7 +56,7 @@ class TestLocation:
 
     def test_add_exit_can_create_exit_without_destination(self):
         # Arrange
-        location_sid = Sid.generate()
+        location_sid = SidGenerator.generate()
         location = Location(location_sid, "Room with blocked exit")
 
         # Act
@@ -66,14 +67,14 @@ class TestLocation:
 
     def test_get_available_directions_returns_only_connected_exits(self):
         # Arrange
-        location_sid = Sid.generate()
-        destination_sid = Sid.generate()
+        location_sid = SidGenerator.generate()
+        destination_sid = SidGenerator.generate()
         location = Location(location_sid, "Hub room")
 
         # Add some exits
         location.add_exit(Direction.NORTH, destination_sid)  # Connected
         location.add_exit(Direction.SOUTH, None)  # Blocked/unconnected
-        location.add_exit(Direction.EAST, Sid.generate())  # Connected
+        location.add_exit(Direction.EAST, SidGenerator.generate())  # Connected
 
         # Act
         available_directions = location.get_available_directions()
@@ -86,7 +87,7 @@ class TestLocation:
 
     def test_get_available_directions_returns_empty_list_when_no_exits(self):
         # Arrange
-        location_sid = Sid.generate()
+        location_sid = SidGenerator.generate()
         location = Location(location_sid, "Isolated room")
 
         # Act
@@ -97,10 +98,10 @@ class TestLocation:
 
     def test_add_item_adds_item_to_location(self):
         # Arrange
-        location_sid = Sid.generate()
+        location_sid = SidGenerator.generate()
         location = Location(location_sid, "Treasure room")
 
-        item_sid = Sid.generate()
+        item_sid = SidGenerator.generate()
         item = Item(item_sid, "Golden key", "A shiny golden key", [Action.PICK])
 
         # Act
@@ -112,12 +113,12 @@ class TestLocation:
 
     def test_add_multiple_items_maintains_order(self):
         # Arrange
-        location_sid = Sid.generate()
+        location_sid = SidGenerator.generate()
         location = Location(location_sid, "Storage room")
 
-        item1 = Item(Sid.generate(), "Sword", "A sharp sword", [Action.PICK])
-        item2 = Item(Sid.generate(), "Shield", "A sturdy shield", [Action.PICK])
-        item3 = Item(Sid.generate(), "Potion", "A healing potion", [Action.USE])
+        item1 = Item(SidGenerator.generate(), "Sword", "A sharp sword", [Action.PICK])
+        item2 = Item(SidGenerator.generate(), "Shield", "A sturdy shield", [Action.PICK])
+        item3 = Item(SidGenerator.generate(), "Potion", "A healing potion", [Action.USE])
 
         # Act
         location.add_item(item1)
@@ -130,13 +131,13 @@ class TestLocation:
 
     def test_location_with_multiple_exits_and_items(self):
         # Arrange
-        location_sid = Sid.generate()
+        location_sid = SidGenerator.generate()
         location = Location(location_sid, "Central chamber")
 
         # Add exits in all directions
-        north_sid = Sid.generate()
-        south_sid = Sid.generate()
-        east_sid = Sid.generate()
+        north_sid = SidGenerator.generate()
+        south_sid = SidGenerator.generate()
+        east_sid = SidGenerator.generate()
 
         location.add_exit(Direction.NORTH, north_sid)
         location.add_exit(Direction.SOUTH, south_sid)
@@ -144,8 +145,8 @@ class TestLocation:
         location.add_exit(Direction.WEST, None)  # Blocked exit
 
         # Add items
-        torch = Item(Sid.generate(), "Torch", "A burning torch", [Action.PICK, Action.USE])
-        key = Item(Sid.generate(), "Key", "An old key", [Action.PICK])
+        torch = Item(SidGenerator.generate(), "Torch", "A burning torch", [Action.PICK, Action.USE])
+        key = Item(SidGenerator.generate(), "Key", "An old key", [Action.PICK])
 
         location.add_item(torch)
         location.add_item(key)
@@ -161,11 +162,11 @@ class TestLocation:
 
     def test_location_exits_can_be_overwritten(self):
         # Arrange
-        location_sid = Sid.generate()
+        location_sid = SidGenerator.generate()
         location = Location(location_sid, "Changing room")
 
-        original_destination = Sid.generate()
-        new_destination = Sid.generate()
+        original_destination = SidGenerator.generate()
+        new_destination = SidGenerator.generate()
 
         # Act
         location.add_exit(Direction.NORTH, original_destination)

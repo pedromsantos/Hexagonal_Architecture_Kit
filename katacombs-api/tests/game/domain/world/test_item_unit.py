@@ -2,6 +2,7 @@ import pytest
 
 from src.game.domain.player import Sid
 from src.game.domain.world import Action, Item
+from src.game.infrastructure.sid_generator import SidGenerator
 
 
 class TestItem:
@@ -11,7 +12,7 @@ class TestItem:
 
     def test_item_can_be_created_with_valid_data(self):
         # Arrange
-        item_sid = Sid.generate()
+        item_sid = SidGenerator.generate()
         name = "Magic Sword"
         description = "A legendary sword with mystical powers"
         actions = [Action.PICK, Action.USE]
@@ -27,7 +28,7 @@ class TestItem:
 
     def test_item_can_be_created_without_actions(self):
         # Arrange
-        item_sid = Sid.generate()
+        item_sid = SidGenerator.generate()
         name = "Decorative Vase"
         description = "A beautiful but fragile vase"
 
@@ -42,7 +43,7 @@ class TestItem:
 
     def test_item_cannot_be_created_with_empty_name(self):
         # Arrange
-        item_sid = Sid.generate()
+        item_sid = SidGenerator.generate()
         empty_name = ""
         description = "Some description"
 
@@ -52,7 +53,7 @@ class TestItem:
 
     def test_item_cannot_be_created_with_whitespace_only_name(self):
         # Arrange
-        item_sid = Sid.generate()
+        item_sid = SidGenerator.generate()
         whitespace_name = "   \t\n   "
         description = "Some description"
 
@@ -62,7 +63,7 @@ class TestItem:
 
     def test_item_cannot_be_created_with_empty_description(self):
         # Arrange
-        item_sid = Sid.generate()
+        item_sid = SidGenerator.generate()
         name = "Magic Ring"
         empty_description = ""
 
@@ -72,7 +73,7 @@ class TestItem:
 
     def test_item_cannot_be_created_with_whitespace_only_description(self):
         # Arrange
-        item_sid = Sid.generate()
+        item_sid = SidGenerator.generate()
         name = "Magic Ring"
         whitespace_description = "   \t\n   "
 
@@ -82,7 +83,7 @@ class TestItem:
 
     def test_item_with_single_action(self):
         # Arrange
-        item_sid = Sid.generate()
+        item_sid = SidGenerator.generate()
         name = "Health Potion"
         description = "A potion that restores health when consumed"
         actions = [Action.USE]
@@ -97,7 +98,7 @@ class TestItem:
 
     def test_item_with_multiple_actions(self):
         # Arrange
-        item_sid = Sid.generate()
+        item_sid = SidGenerator.generate()
         name = "Torch"
         description = "A burning torch that provides light"
         actions = [Action.PICK, Action.USE]
@@ -112,7 +113,7 @@ class TestItem:
 
     def test_item_actions_can_contain_duplicates(self):
         # Arrange
-        item_sid = Sid.generate()
+        item_sid = SidGenerator.generate()
         name = "Strange Artifact"
         description = "An artifact with mysterious properties"
         actions = [Action.USE, Action.USE, Action.PICK]  # Duplicate USE actions
@@ -126,7 +127,7 @@ class TestItem:
 
     def test_item_with_valid_name_containing_spaces_and_special_chars(self):
         # Arrange
-        item_sid = Sid.generate()
+        item_sid = SidGenerator.generate()
         name = "Ancient Key of Wisdom"
         description = "A key with intricate engravings"
 
@@ -138,7 +139,7 @@ class TestItem:
 
     def test_item_with_multiline_description(self):
         # Arrange
-        item_sid = Sid.generate()
+        item_sid = SidGenerator.generate()
         name = "Spellbook"
         description = "A thick book containing ancient spells.\nIts pages glow with magical energy."
 
@@ -150,7 +151,7 @@ class TestItem:
 
     def test_items_are_equal_with_same_sid(self):
         # Arrange
-        item_sid = Sid.generate()
+        item_sid = SidGenerator.generate()
         item1 = Item(item_sid, "Sword", "A sharp blade", [Action.PICK])
         item2 = Item(item_sid, "Sword", "A sharp blade", [Action.PICK])
 
@@ -159,8 +160,8 @@ class TestItem:
 
     def test_items_are_different_with_different_sid(self):
         # Arrange
-        item1 = Item(Sid.generate(), "Sword", "A sharp blade", [Action.PICK])
-        item2 = Item(Sid.generate(), "Sword", "A sharp blade", [Action.PICK])
+        item1 = Item(SidGenerator.generate(), "Sword", "A sharp blade", [Action.PICK])
+        item2 = Item(SidGenerator.generate(), "Sword", "A sharp blade", [Action.PICK])
 
         # Act & Assert
         assert item1 != item2  # Different SIDs mean different items

@@ -1,7 +1,7 @@
 import pytest
 
 from src.game.domain.player import Bag, Player, Sid
-from src.game.domain.world import Location
+from src.game.infrastructure.sid_generator import SidGenerator
 
 
 class TestPlayer:
@@ -10,51 +10,40 @@ class TestPlayer:
     """
 
     def test_player_can_be_created_with_valid_data(self):
-        # Arrange
-        player_sid = Sid.generate()
+        player_sid = SidGenerator.generate()
         name = "Pedro"
-        location = Location(sid=Sid.generate(), description="Starting room")
+        location_sid = SidGenerator.generate()
         bag = Bag()
 
-        # Act
-        player = Player.create(player_sid, name, location, bag)
+        player = Player.create(player_sid, name, location_sid, bag)
 
-        # Assert
         assert player.sid == player_sid
         assert player.name == name
-        assert player.location == location
+        assert player.location_sid == location_sid
         assert player.bag == bag
         assert player.is_active is True
 
     def test_player_name_cannot_be_empty(self):
-        # Arrange
-        player_sid = Sid.generate()
-        location = Location(Sid.generate(), "Starting room")
+        player_sid = SidGenerator.generate()
+        location_sid = SidGenerator.generate()
         bag = Bag()
 
-        # Act & Assert
         with pytest.raises(ValueError, match="Player name cannot be empty"):
-            Player.create(player_sid, "", location, bag)
+            Player.create(player_sid, "", location_sid, bag)
 
     def test_player_can_move_to_new_location(self):
-        # Arrange
-        player_sid = Sid.generate()
-        original_location = Location(Sid.generate(), "Original room")
-        new_location = Location(Sid.generate(), "New room")
-        player = Player.create(player_sid, "Pedro", original_location, Bag())
+        player_sid = SidGenerator.generate()
+        original_location_sid = SidGenerator.generate()
+        new_location_sid = SidGenerator.generate()
+        player = Player.create(player_sid, "Pedro", original_location_sid, Bag())
 
-        # Act
-        player.move_to_location(new_location)
+        player.move_to_location(new_location_sid)
 
-        # Assert
-        assert player.location == new_location
+        assert player.location_sid == new_location_sid
 
     def test_player_can_quit_game(self):
-        # Arrange
-        player = Player.create(Sid.generate(), "Pedro", Location(Sid.generate(), "Room"), Bag())
+        player = Player.create(SidGenerator.generate(), "Pedro", SidGenerator.generate(), Bag())
 
-        # Act
         player.quit_game()
 
-        # Assert
         assert player.is_active is False

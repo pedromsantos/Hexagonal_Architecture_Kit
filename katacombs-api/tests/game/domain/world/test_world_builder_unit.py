@@ -2,6 +2,7 @@ import pytest
 
 from src.game.domain.player import Sid
 from src.game.domain.world import Action, Direction, Location, World, WorldBuilder
+from src.game.infrastructure.sid_generator import SidGenerator
 
 
 class TestWorldBuilder:
@@ -12,9 +13,14 @@ class TestWorldBuilder:
     def test_create_starter_world_creates_valid_world(self):
         # Arrange
         builder = WorldBuilder()
+        # SIDs provided by external system (tests act as external system)
+        entrance_sid = SidGenerator.generate()
+        north_sid = SidGenerator.generate()
+        east_sid = SidGenerator.generate()
+        torch_sid = SidGenerator.generate()
 
         # Act
-        world = builder.create_starter_world()
+        world = builder.create_starter_world(entrance_sid, north_sid, east_sid, torch_sid)
 
         # Assert
         assert isinstance(world, World)
@@ -23,9 +29,13 @@ class TestWorldBuilder:
     def test_create_starter_world_has_entrance_hall(self):
         # Arrange
         builder = WorldBuilder()
+        entrance_sid = SidGenerator.generate()
+        north_sid = SidGenerator.generate()
+        east_sid = SidGenerator.generate()
+        torch_sid = SidGenerator.generate()
 
         # Act
-        world = builder.create_starter_world()
+        world = builder.create_starter_world(entrance_sid, north_sid, east_sid, torch_sid)
         starting_location = world.get_starting_location()
 
         # Assert
@@ -35,9 +45,13 @@ class TestWorldBuilder:
     def test_create_starter_world_has_connected_locations(self):
         # Arrange
         builder = WorldBuilder()
+        entrance_sid = SidGenerator.generate()
+        north_sid = SidGenerator.generate()
+        east_sid = SidGenerator.generate()
+        torch_sid = SidGenerator.generate()
 
         # Act
-        world = builder.create_starter_world()
+        world = builder.create_starter_world(entrance_sid, north_sid, east_sid, torch_sid)
         starting_location = world.get_starting_location()
 
         # Assert
@@ -49,9 +63,13 @@ class TestWorldBuilder:
     def test_create_starter_world_locations_are_bidirectionally_connected(self):
         # Arrange
         builder = WorldBuilder()
+        entrance_sid = SidGenerator.generate()
+        north_sid = SidGenerator.generate()
+        east_sid = SidGenerator.generate()
+        torch_sid = SidGenerator.generate()
 
         # Act
-        world = builder.create_starter_world()
+        world = builder.create_starter_world(entrance_sid, north_sid, east_sid, torch_sid)
         starting_location = world.get_starting_location()
 
         # Navigate north and back
@@ -66,9 +84,13 @@ class TestWorldBuilder:
     def test_create_starter_world_has_torch_item(self):
         # Arrange
         builder = WorldBuilder()
+        entrance_sid = SidGenerator.generate()
+        north_sid = SidGenerator.generate()
+        east_sid = SidGenerator.generate()
+        torch_sid = SidGenerator.generate()
 
         # Act
-        world = builder.create_starter_world()
+        world = builder.create_starter_world(entrance_sid, north_sid, east_sid, torch_sid)
         starting_location = world.get_starting_location()
 
         # Assert
@@ -81,7 +103,7 @@ class TestWorldBuilder:
     def test_builder_can_create_custom_world_with_single_location(self):
         # Arrange
         builder = WorldBuilder()
-        location_sid = Sid.generate()
+        location_sid = SidGenerator.generate()
         custom_location = Location(location_sid, "Custom test room")
 
         # Act
@@ -95,9 +117,9 @@ class TestWorldBuilder:
         # Arrange
         builder = WorldBuilder()
 
-        location1_sid = Sid.generate()
-        location2_sid = Sid.generate()
-        location3_sid = Sid.generate()
+        location1_sid = SidGenerator.generate()
+        location2_sid = SidGenerator.generate()
+        location3_sid = SidGenerator.generate()
 
         location1 = Location(location1_sid, "First room")
         location2 = Location(location2_sid, "Second room")
@@ -122,7 +144,7 @@ class TestWorldBuilder:
     def test_builder_add_location_returns_builder_for_chaining(self):
         # Arrange
         builder = WorldBuilder()
-        location = Location(Sid.generate(), "Test room")
+        location = Location(SidGenerator.generate(), "Test room")
 
         # Act
         result = builder.add_location(location)
@@ -133,7 +155,7 @@ class TestWorldBuilder:
     def test_builder_set_starting_location_returns_builder_for_chaining(self):
         # Arrange
         builder = WorldBuilder()
-        location_sid = Sid.generate()
+        location_sid = SidGenerator.generate()
 
         # Act
         result = builder.set_starting_location(location_sid)
@@ -144,7 +166,7 @@ class TestWorldBuilder:
     def test_builder_throws_error_when_building_without_starting_location(self):
         # Arrange
         builder = WorldBuilder()
-        location = Location(Sid.generate(), "Test room")
+        location = Location(SidGenerator.generate(), "Test room")
         builder.add_location(location)
 
         # Act & Assert
@@ -154,8 +176,8 @@ class TestWorldBuilder:
     def test_builder_throws_error_when_starting_location_not_in_world(self):
         # Arrange
         builder = WorldBuilder()
-        location_sid = Sid.generate()
-        invalid_starting_sid = Sid.generate()
+        location_sid = SidGenerator.generate()
+        invalid_starting_sid = SidGenerator.generate()
 
         location = Location(location_sid, "Test room")
         builder.add_location(location)
@@ -170,11 +192,15 @@ class TestWorldBuilder:
         builder = WorldBuilder()
 
         # Add some custom data first
-        custom_location = Location(Sid.generate(), "Custom room")
+        custom_location = Location(SidGenerator.generate(), "Custom room")
         builder.add_location(custom_location)
 
         # Act
-        world = builder.create_starter_world()
+        entrance_sid = SidGenerator.generate()
+        north_sid = SidGenerator.generate()
+        east_sid = SidGenerator.generate()
+        torch_sid = SidGenerator.generate()
+        world = builder.create_starter_world(entrance_sid, north_sid, east_sid, torch_sid)
 
         # Assert - Should not contain the custom location
         custom_locations = [
@@ -191,8 +217,17 @@ class TestWorldBuilder:
         builder = WorldBuilder()
 
         # Act
-        world1 = builder.create_starter_world()
-        world2 = builder.create_starter_world()
+        entrance_sid1 = SidGenerator.generate()
+        north_sid1 = SidGenerator.generate()
+        east_sid1 = SidGenerator.generate()
+        torch_sid1 = SidGenerator.generate()
+        world1 = builder.create_starter_world(entrance_sid1, north_sid1, east_sid1, torch_sid1)
+
+        entrance_sid2 = SidGenerator.generate()
+        north_sid2 = SidGenerator.generate()
+        east_sid2 = SidGenerator.generate()
+        torch_sid2 = SidGenerator.generate()
+        world2 = builder.create_starter_world(entrance_sid2, north_sid2, east_sid2, torch_sid2)
 
         # Assert - Worlds should have different locations with different SIDs
         world1_starting = world1.get_starting_location()
@@ -206,11 +241,11 @@ class TestWorldBuilder:
         builder = WorldBuilder()
 
         # Build first world
-        location1 = Location(Sid.generate(), "First world room")
+        location1 = Location(SidGenerator.generate(), "First world room")
         world1 = builder.add_location(location1).set_starting_location(location1.sid)._build()
 
         # Build second world with same builder
-        location2 = Location(Sid.generate(), "Second world room")
+        location2 = Location(SidGenerator.generate(), "Second world room")
         world2 = builder.add_location(location2).set_starting_location(location2.sid)._build()
 
         # Assert - Both worlds should be independent

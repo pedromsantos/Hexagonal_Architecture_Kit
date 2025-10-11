@@ -1,22 +1,25 @@
 from src.game.domain.player import Bag, Player, Sid
-from src.game.domain.world import Location
 from src.game.infrastructure.repositories.in_memory_player_repository import (
     InMemoryPlayerRepository,
 )
+from src.game.infrastructure.sid_generator import SidGenerator
 
 
 class TestPlayerRepository:
-    """INTEGRATION TEST: Player Repository Implementation
+    """INTEGRATION TEST: Player Repository Implementation (WRITE-SIDE)
     Tests the driven adapter implementation with real storage
     Uses in-memory implementation for fast testing
+
+    IMPORTANT: This tests the WRITE-SIDE repository only.
+    For query operations, see tests for PlayerProjectionRepository.
     """
 
     def test_save_and_find_player_by_sid(self):
         # Arrange
         repo = InMemoryPlayerRepository()
-        player_sid = Sid.generate()
-        location = Location(Sid.generate(), "Test room")
-        player = Player.create(player_sid, "Pedro", location, Bag())
+        player_sid = SidGenerator.generate()
+        location_sid = SidGenerator.generate()
+        player = Player.create(player_sid, "Pedro", location_sid, Bag())
 
         # Act - Save player
         repo.save(player)
@@ -28,30 +31,12 @@ class TestPlayerRepository:
         assert retrieved_player.name == player.name
         assert retrieved_player.is_active == player.is_active
 
-    def test_find_all_active_players(self):
-        # Arrange
-        repo = InMemoryPlayerRepository()
-        location = Location(Sid.generate(), "Test room")
-
-        active_player = Player.create(Sid.generate(), "Active", location, Bag())
-        inactive_player = Player.create(Sid.generate(), "Inactive", location, Bag())
-        inactive_player.quit_game()
-
-        # Act
-        repo.save(active_player)
-        repo.save(inactive_player)
-        active_players = repo.find_all_active()
-
-        # Assert
-        assert len(active_players) == 1
-        assert active_players[0].sid == active_player.sid
-
     def test_delete_player(self):
         # Arrange
         repo = InMemoryPlayerRepository()
-        player_sid = Sid.generate()
-        location = Location(Sid.generate(), "Test room")
-        player = Player.create(player_sid, "Pedro", location, Bag())
+        player_sid = SidGenerator.generate()
+        location_sid = SidGenerator.generate()
+        player = Player.create(player_sid, "Pedro", location_sid, Bag())
 
         repo.save(player)
 
@@ -66,7 +51,7 @@ class TestPlayerRepository:
     def test_find_nonexistent_player_returns_none(self):
         # Arrange
         repo = InMemoryPlayerRepository()
-        nonexistent_sid = Sid.generate()
+        nonexistent_sid = SidGenerator.generate()
 
         # Act
         result = repo.find_by_sid(nonexistent_sid)
