@@ -69,6 +69,10 @@ I follow **Pedro's Algorithm (London School TDD)** as documented in the README.m
 
 ### Pedro's Algorithm Implementation
 
+**For complete workflow and agent coordination, see [agents/orchestrator_pedros_algorithm.md](agents/orchestrator_pedros_algorithm.md).**
+
+**For complete agent catalog, see [agents/README.md](agents/README.md).**
+
 Follow this exact sequence for each user story:
 
 1. **ACCEPTANCE TEST (RED)**: Write failing acceptance test covering complete business flow

@@ -1842,7 +1842,7 @@ func (uc *CreateUserUseCase) Execute(ctx context.Context, cmd CreateUserCommand)
 - Input validation in application services should be minimal
 - Use factory methods for complex validation scenarios
 
-### 12. Naming Convention Rules
+### 14. Naming Convention Rules
 
 - Use domain language (Ubiquitous Language) for all class and method names
 - Avoid technical terms in domain layer (no "Manager", "Helper", "Util")
@@ -1852,8 +1852,9 @@ func (uc *CreateUserUseCase) Execute(ctx context.Context, cmd CreateUserCommand)
 - **Port Naming**: End driving ports with "Port", driven ports with "Port"
 - **Adapter Naming**: Include the technology/framework in driven adapter names
 - **Clear Port vs Adapter distinction**: Ports define interfaces, Adapters implement them
+- **Event Naming**: Domain events use past tense, integration events use business-focused names
 
-### 13. Dependency Rules
+### 15. Dependency Rules
 
 - Domain layer should have no external dependencies except standard library
 - Application layer can depend on domain but should use dependency inversion for external concerns
@@ -2655,6 +2656,42 @@ CQRS does not mean that eventual consistency is requiered. This is only required
 
 ### How CQRS Works with Hexagonal Architecture
 
+### Critical Distinction: Domain Reads vs Pure Queries
+
+**Not every read is a query!** CQRS distinguishes between two types of reads:
+
+1. **Domain Reads (Part of Commands)** - Load aggregates for business operations
+2. **Pure Queries (Data Retrieval)** - Retrieve data for UI/reporting
+
+#### Domain Reads - Load Aggregates for Commands
+
+These reads are **part of command execution** and MUST go through the domain:
+
+```typescript
+// Domain read - loading aggregate for business operation
+class ChangeUserEmailUseCase {
+  async execute(command: ChangeUserEmailCommand) {
+    // This is a DOMAIN READ (not a query) - goes through domain
+    const user = await this.userRepository.findById(command.userId);
+    if (!user) throw new UserNotFoundError();
+
+    // Business logic through domain
+    const newEmail = new Email(command.newEmail);
+    user.changeEmail(newEmail); // Domain behavior + events
+
+    await this.userRepository.save(user);
+  }
+}
+```
+
+**Key Characteristics of Domain Reads**:
+
+- Part of command execution
+- Load complete aggregates with business behavior
+- Enforce aggregate boundaries
+- Enable domain validation and business logic
+- Example: Load user to change email, load accounts to transfer money
+
 #### Commands (Writes) - Through the Domain
 
 - **Path**: HTTP → Driving Adapter → Command Use Case → Domain → Repository → Write DB
@@ -2674,19 +2711,21 @@ class RegisterUserUseCase {
 }
 ```
 
-#### Queries (Reads) - Around the Domain
+#### Pure Queries - Around the Domain
+
+**Pure queries are for data retrieval only** and bypass the domain for performance:
 
 - **Path**: HTTP → Driving Adapter → Query Handler → Projection Repository → DTO
 - **Purpose**: Optimized data retrieval without domain overhead
 - **Example**: Getting user list for admin dashboard with pagination and filtering
 
 ```typescript
-// Query side - bypasses domain (but still uses repository adapter)
-class GetUsersQuery {
+// Pure query - for UI/reporting (bypasses domain)
+class GetUserListQuery {
   constructor(private readonly userProjectionRepository: UserProjectionRepository) {}
 
-  async execute(query: GetUsersQuery): Promise<UserListDto[]> {
-    // Goes through repository but bypasses domain objects
+  async execute(query: GetUserListQuery): Promise<UserListDto[]> {
+    // Direct to projection repository - no domain objects
     return await this.userProjectionRepository.findUsersByStatus(
       query.status,
       query.limit,
@@ -2711,6 +2750,67 @@ class UserProjectionRepository {
   }
 }
 ```
+
+**Key Characteristics of Pure Queries**:
+
+- No state changes or side effects
+- Bypass domain objects for performance
+- Return DTOs shaped for UI/API needs
+- Can use denormalized views, different databases
+- Example: User list for UI, sales reports, dashboard data
+
+### Complete Example: Domain Reads vs Pure Queries
+
+```typescript
+// DOMAIN READ - Part of transfer command (through domain)
+class TransferMoneyUseCase {
+  async execute(command: TransferMoneyCommand) {
+    // Domain reads - loading aggregates for business operation
+    const fromAccount = await this.accountRepository.findById(command.fromAccountId);
+    const toAccount = await this.accountRepository.findById(command.toAccountId);
+
+    if (!fromAccount || !toAccount) {
+      throw new AccountNotFoundError();
+    }
+
+    // Business logic through domain
+    fromAccount.withdraw(command.amount); // Domain behavior + validation
+    toAccount.deposit(command.amount); // Domain behavior + validation
+
+    // Save changes
+    await this.accountRepository.save(fromAccount);
+    await this.accountRepository.save(toAccount);
+
+    return new TransferResponse(command.transactionId);
+  }
+}
+
+// PURE QUERY - Get account balance for UI (around domain)
+class GetAccountBalanceQuery {
+  async execute(query: GetAccountBalanceQuery): Promise<AccountBalanceDto> {
+    // Pure query - bypasses domain for performance
+    return await this.accountProjectionRepository.getAccountBalance(query.accountId);
+  }
+}
+
+// Different repositories for different purposes
+interface AccountRepository {
+  // Domain repository - works with aggregates
+  findById(id: AccountId): Promise<Account>;
+  save(account: Account): Promise<void>;
+}
+
+interface AccountProjectionRepository {
+  // Projection repository - optimized queries returning DTOs
+  getAccountBalance(accountId: string): Promise<AccountBalanceDto>;
+  getTransactionHistory(accountId: string): Promise<TransactionDto[]>;
+}
+```
+
+**The Pattern**:
+
+- **Domain reads** (findById) → Load aggregates → Business logic → Save changes
+- **Pure queries** (getAccountBalance) → Direct projection → Return DTO → No changes
 
 ### Key Benefits
 

@@ -193,118 +193,112 @@ Some projects may configure custom slash commands that invoke agents.
 
 ### Available Agents
 
-#### 1. [Hexagonal Architecture Review Agent](agents/hexagonal_review.md)
+#### Orchestrator Agent
 
-Reviews code against Hexagonal Architecture and DDD patterns:
+**[orchestrator.md](agents/orchestrator.md)** - Main workflow coordinator
 
-- Validates 1:1 aggregate-repository relationships
-- Checks dependency flow compliance
-- Ensures proper layer boundaries
-- Verifies port/adapter patterns
-- Identifies anemic domain models
+Orchestrates all specialized agents through Pedro's Algorithm TDD cycle:
 
-**Example Usage**:
+- Coordinates planning → test-writing → implementation → review workflow
+- Enforces acceptance test stays RED until feature complete
+- Manages commit discipline (only on green)
+- Ensures proper agent sequencing and quality gates
 
-```
-Review my domain layer following @agents/hexagonal_review.md
+#### Planning Agents
 
-Check if my repositories follow the aggregate pattern using @agents/hexagonal_review.md
-```
+**[user_story.md](agents/writers/planning/user_story.md)** - Translates business requirements into well-formed user stories with acceptance criteria and domain concepts.
 
-**See**: [Architecture Review Example](examples/architecture_review_example.md)
+**[story_slicer.md](agents/writers/planning/story_slicer.md)** - Breaks large stories into vertical slices that deliver business value independently.
 
-#### 2. [London School TDD Agent](agents/london_tdd.md)
+**[architect.md](agents/writers/planning/architect.md)** - Plans architecture: aggregates, ports, adapters, CQRS split, testing strategy.
 
-Guides implementation using London School TDD (Pedro's Algorithm):
+#### Test-Writing Agents
 
-- Starts with acceptance tests for complete business flows
-- Enforces proper mocking discipline (mock adapters, use real domain objects)
-- Separates commands (verify) from queries (don't verify)
-- Ensures IDs generated externally
-- Maintains proper test taxonomy
+**[acceptance.md](agents/writers/tests/acceptance.md)** - Writes failing acceptance tests for COMPLETE use case execution with ALL adapters mocked/faked.
 
-**Example Usage**:
+**[unit.md](agents/writers/tests/unit.md)** - Writes unit tests for domain behavior with proper mocking discipline (mock ports only, never domain objects).
 
-```
-Implement user registration with email confirmation following @agents/london_tdd.md
+**[integration.md](agents/writers/tests/integration.md)** - Tests driven adapters with real external systems (databases, APIs).
 
-Help me write tests for my order processing feature using @agents/london_tdd.md
-```
+**[contract.md](agents/writers/tests/contract.md)** - Tests driving adapter contracts (HTTP status codes, validation, response schemas).
 
-**See**: [London TDD Session Example](examples/london_tdd_session_example.md)
+**[e2e.md](agents/writers/tests/e2e.md)** - Optional full system tests with real infrastructure.
 
-#### 3. [Chicago/Detroit School TDD Agent](agents/chicago_tdd.md)
+#### Domain Layer Implementation Agents
 
-Guides implementation using Classical TDD (Chicago/Detroit School):
+**[aggregate.md](agents/writers/domain/aggregate.md)** - Implements complete aggregates (root + entities + value objects) with proper boundaries and invariant enforcement.
 
-- Minimal mocking (only at system boundaries)
-- State verification over behavior verification
-- Emergent design through refactoring
-- In-memory test doubles for repositories
-- Bottom-up approach starting with domain objects
+**[services.md](agents/writers/domain/services.md)** - Implements stateless domain services for logic spanning multiple aggregates.
 
-**Example Usage**:
+**[events.md](agents/writers/domain/events.md)** - Creates immutable domain events (past tense) representing state changes.
 
-```
-Create order processing workflow following @agents/chicago_tdd.md
+#### Application Layer Implementation Agents
 
-Implement shopping cart feature using @agents/chicago_tdd.md
-```
+**[command_handler.md](agents/writers/application/command_handler.md)** - Implements CQRS write operations (commands) that go THROUGH domain for business rule enforcement.
 
-#### 4. [Code Review Agent](agents/code_review.md)
+**[query_handler.md](agents/writers/application/query_handler.md)** - Implements CQRS read operations (queries) that BYPASS domain for optimized performance.
 
-Comprehensive code review against all RULES.md patterns:
+**[repository_interface.md](agents/writers/domain/repository_interface.md)** - Designs repository interfaces in domain layer (one per aggregate root, domain language).
 
-- Entity, Value Object, Aggregate compliance
-- Repository pattern validation
-- Use case orchestration checks
-- Domain event verification
-- Naming convention compliance
-- Dependency rule enforcement
+#### Infrastructure Layer Implementation Agents
 
-**Example Usage**:
+**[driving_adapter.md](agents/writers/infrastructure/driving_adapter.md)** - Implements HTTP controllers, CLI handlers that translate external requests to commands/queries.
 
-```
-Review my entire codebase for RULES.md compliance using @agents/code_review.md
+**[repository.md](agents/writers/infrastructure/repository.md)** - Implements database-specific repositories with ORM mapping.
 
-Check if my value objects follow the rules in @agents/code_review.md
-```
+**[external_service_adapter.md](agents/writers/infrastructure/external_service_adapter.md)** - Implements adapters for external APIs with authentication, retries, error handling.
 
-#### 5. [CQRS Review Agent](agents/cqrs_review.md)
+**[database_migration.md](agents/writers/infrastructure/database_migration.md)** - Creates database migration scripts for schema and data changes.
 
-Reviews CQRS (Command Query Responsibility Segregation) implementation:
+#### Utility Agents
 
-- Validates command/query separation
-- Ensures commands go through domain layer
-- Verifies queries bypass domain for performance
-- Checks write/read repository split
-- Identifies mixed responsibilities
-- Validates DTO usage and projection patterns
+**[dto_generator.md](agents/writers/utilities/dto_generator.md)** - Generates Data Transfer Objects for commands, queries, and responses.
 
-**Example Usage**:
+**[id_generator.md](agents/writers/utilities/id_generator.md)** - Provides external ID/SID generation (IDs generated OUTSIDE application).
 
-```
-Review my CQRS implementation using @agents/cqrs_review.md
+**[time_provider.md](agents/writers/utilities/time_provider.md)** - Abstracts system time for testability.
 
-Check if my queries are bypassing the domain properly with @agents/cqrs_review.md
-```
+#### Review Agents
 
-#### 6. [Test Review Agent](agents/test_review.md)
+**[hexagonal.md](agents/reviewers/hexagonal.md)** - Reviews code against Hexagonal Architecture and DDD patterns (1:1 aggregate-repository, dependency flow, layer boundaries).
 
-Validates proper test classification and boundaries:
+**[cqrs.md](agents/reviewers/cqrs.md)** - Validates CQRS implementation (command/query separation, commands through domain, queries bypass domain).
 
-- Identifies unit tests mislabeled as acceptance tests
-- Checks mocking discipline (what to mock vs. use real)
-- Validates mock verification (commands vs. queries)
-- Ensures proper test organization
-- Verifies test type boundaries
+**[ddd.md](agents/reviewers/ddd.md)** - Validates DDD tactical patterns (entities, value objects, aggregates, repositories, domain services, domain events).
 
-**Example Usage**:
+**[code.md](agents/reviewers/code.md)** - Reviews code quality (functional programming over loops, code smells, Object Calisthenics principles).
 
-```
-Review my test suite for proper test taxonomy using @agents/test_review.md
+**[tests.md](agents/reviewers/tests.md)** - Validates proper test taxonomy and boundaries (unit vs acceptance, mocking discipline, verification rules).
 
-Check if I'm mislabeling unit tests as acceptance tests with @agents/test_review.md
+**[london_tdd.md](agents/reviewers/london_tdd.md)** - Guides implementation using London School TDD (Pedro's Algorithm) with proper mocking and verification discipline.
+
+**[chicago_tdd.md](agents/reviewers/chicago_tdd.md)** - Guides implementation using Classical TDD (Chicago/Detroit School) with minimal mocking and state verification.
+
+### Agent Usage Example
+
+```txt
+# Start with planning
+"Write a user story for user registration with email confirmation"
+→ writers/planning/user_story
+
+"Slice this story into deliverable pieces"
+→ writers/planning/story_slicer
+
+"Plan the architecture for user registration"
+→ writers/planning/architect
+
+# Implement with TDD
+"Implement user registration following Pedro's Algorithm"
+→ orchestrator
+  → writers/tests/acceptance (writes failing test)
+  → writers/tests/unit + writers/domain/aggregate (domain objects)
+  → writers/application/command_handler (use case)
+  → writers/tests/integration + writers/infrastructure/repository (persistence)
+  → writers/tests/contract + writers/infrastructure/driving_adapter (HTTP API)
+
+# Review before commit
+"Review my implementation for architectural compliance"
+→ reviewers/hexagonal, reviewers/cqrs, reviewers/ddd, reviewers/code, reviewers/tests
 ```
 
 ### How Agents Work
@@ -346,13 +340,15 @@ Recommended directory structure when using these patterns:
 your-project/
 ├── CLAUDE.md                 # AI instructions (copied from this kit)
 ├── RULES.md                  # Architecture rules (copied from this kit)
-├── agents/                   # (Optional) Specialized review agents
-│   ├── hexagonal_review.md
-│   ├── cqrs_review.md
-│   ├── london_tdd.md
-│   ├── chicago_tdd.md
-│   ├── code_review.md
-│   └── test_review.md
+├── agents/                   # (Optional) Specialized agents
+│   ├── writers/             # Code generation agents
+│   │   ├── planning/        # Architecture and story planning
+│   │   ├── tests/           # Tests (acceptance, unit, integration, etc.)
+│   │   ├── domain/          # Domain layer (aggregates, events, services)
+│   │   ├── application/     # Application layer (command/query handlers)
+│   │   ├── infrastructure/  # Infrastructure layer (adapters, repositories)
+│   │   └── utilities/       # Cross-cutting utilities (DTOs, ID/time providers)
+│   └── reviewers/           # Review agents (user stories, code, ddd, architecture, tests)
 ├── examples/                 # (Optional) Agent usage examples
 │   ├── architecture_review_example.md
 │   └── london_tdd_session_example.md
