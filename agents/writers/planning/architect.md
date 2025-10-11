@@ -18,8 +18,11 @@ Analyze user story slices and create detailed architecture plans specifying aggr
 - **[AggregateName]** (Root: [EntityName])
   - Entities: [List internal entities]
   - Value Objects: [List value objects]
+  - **Domain Methods**: [List key business behavior methods - THIS IS REQUIRED]
   - Business Rules: [Key invariants]
   - Repository: [RepositoryName]
+
+**⚠️ MANDATORY: Always include Domain Methods section with business behavior**
 
 ### Value Objects
 
@@ -27,7 +30,13 @@ Analyze user story slices and create detailed architecture plans specifying aggr
 
 ### Domain Services
 
-- **[ServiceName]**: [When logic spans multiple aggregates]
+- **[ServiceName]**: [ONLY when logic spans multiple aggregates]
+
+**⚠️ CRITICAL: Avoid Anemic Domain Model Anti-Pattern**
+
+- Domain logic should be **methods within aggregates**, NOT separate services
+- Create domain services ONLY when logic involves multiple aggregates
+- Validation, business rules, and entity behavior belong IN the aggregate
 
 ### Domain Events
 
@@ -573,6 +582,29 @@ ORDER BY created_at DESC;
 - ❌ WRONG: LocationRepository for internal entity
 - ✅ RIGHT: WorldRepository for World aggregate
 - Aggregate handles internal traversal
+
+### Domain Services vs Aggregate Methods?
+
+**Domain Services ONLY for multi-aggregate logic:**
+
+✅ Create domain service when:
+
+- Logic spans multiple aggregates
+- Coordination between bounded contexts needed
+- Complex algorithmic logic that doesn't belong to any single aggregate
+
+❌ DON'T create domain service for:
+
+- **Validation logic** → Put in aggregate methods or value objects
+- **Single aggregate behavior** → Put methods directly in the aggregate
+- **Item/entity manipulation** → Put in the owning aggregate
+- **Business rule enforcement** → Put in the aggregate that owns the rule
+
+**Examples:**
+
+- ❌ WRONG: `MovementValidator` service → `Player.move_to_location()` method
+- ❌ WRONG: `ItemActionValidator` service → `Player.use_item()` method
+- ✅ RIGHT: `TransferService` → Coordinates Player and BankAccount aggregates
 
 ## Output Format
 
