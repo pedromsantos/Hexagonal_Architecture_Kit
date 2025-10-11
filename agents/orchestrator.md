@@ -81,15 +81,27 @@ ENTRY POINT 1 - No User Stories Yet:
 3. user_story_slicer → Break into vertical slices (if stories too large)
 4. user_story_review → Quick validation of slices
 5. hexagonal_architect → Plan architecture and CQRS split
+🛡️ **MANDATORY**: scope_guardian → Review architecture for scope creep
+   - Verify only current story requirements included
+   - Remove unnecessary methods/aggregates beyond current need
+   - Challenge infrastructure complexity
 
 ENTRY POINT 2 - Have User Stories, Need Validation:
 2. user_story_review → Validate existing stories
 3. user_story_slicer → Break down if needed (skip if stories are right size)
 4. user_story_review → Quick validation (skip if no slicing occurred)
 5. hexagonal_architect → Plan architecture and CQRS split
+🛡️ **MANDATORY**: scope_guardian → Review architecture for scope creep
+   - Verify only current story requirements included
+   - Remove unnecessary methods/aggregates beyond current need
+   - Challenge infrastructure complexity
 
 ENTRY POINT 3 - Have Quality User Stories Ready:
 5. hexagonal_architect → Plan architecture and CQRS split
+🛡️ **MANDATORY**: scope_guardian → Review architecture for scope creep
+   - Verify only current story requirements included
+   - Remove unnecessary methods/aggregates beyond current need
+   - Challenge infrastructure complexity
 
 ### Decision Matrix: Where to Start
 
