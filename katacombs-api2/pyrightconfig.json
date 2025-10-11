@@ -1,0 +1,103 @@
+{
+  "include": ["src", "tests"],
+  "exclude": ["**/__pycache__", "**/.pytest_cache", "**/node_modules", "**/.venv"],
+  "venvPath": ".",
+  "venv": ".venv",
+  "pythonVersion": "3.11",
+  "typeCheckingMode": "strict",
+  "useLibraryCodeForTypes": true,
+  "strictListInference": true,
+  "strictDictionaryInference": true,
+  "strictSetInference": true,
+  "strictParameterNoneValue": true,
+
+  // Import and module reporting (strictest)
+  "reportMissingImports": "error",
+  "reportMissingModuleSource": "error",
+  "reportMissingTypeStubs": "warning",
+  "reportImportCycles": "error",
+  "reportUnusedImport": "error",
+  "reportUnusedClass": "error",
+  "reportUnusedFunction": "error",
+  "reportUnusedVariable": "error",
+  "reportDuplicateImport": "error",
+  "reportWildcardImportFromLibrary": "error",
+
+  // Type annotation reporting (strictest)
+  "reportUnknownParameterType": "error",
+  "reportUnknownArgumentType": "error",
+  "reportUnknownLambdaType": "error",
+  "reportUnknownVariableType": "error",
+  "reportUnknownMemberType": "warning",
+  "reportMissingParameterType": "error",
+  "reportMissingTypeArgument": "error",
+  "reportInvalidTypeVarUse": "error",
+  "reportUntypedFunctionDecorator": "error",
+  "reportUntypedClassDecorator": "error",
+  "reportUntypedBaseClass": "error",
+  "reportUntypedNamedTuple": "error",
+
+  // General type checking (strictest)
+  "reportGeneralTypeIssues": "error",
+  "reportOptionalSubscript": "error",
+  "reportOptionalMemberAccess": "error",
+  "reportOptionalCall": "error",
+  "reportOptionalIterable": "error",
+  "reportOptionalContextManager": "error",
+  "reportOptionalOperand": "error",
+  "reportTypedDictNotRequiredAccess": "error",
+  "reportPrivateImportUsage": "error",
+  "reportConstantRedefinition": "error",
+  "reportIncompatibleMethodOverride": "error",
+  "reportIncompatibleVariableOverride": "error",
+  "reportOverlappingOverload": "error",
+  "reportPossiblyUnboundVariable": "error",
+  "reportMissingSuperCall": "error",
+  "reportUninitializedInstanceVariable": "error",
+  "reportInvalidStringEscapeSequence": "error",
+  "reportFunctionMemberAccess": "error",
+
+  // Best practices (strictest)
+  "reportAssertAlwaysTrue": "error",
+  "reportSelfClsParameterName": "error",
+  "reportImplicitStringConcatenation": "error",
+  "reportUnusedCallResult": "warning",
+  "reportUnusedCoroutine": "error",
+  "reportUnusedExpression": "warning",
+  "reportUnnecessaryIsInstance": "warning",
+  "reportUnnecessaryCast": "warning",
+  "reportUnnecessaryComparison": "warning",
+  "reportUnnecessaryContains": "warning",
+  "reportImplicitOverride": "warning",
+  "reportShadowedImports": "error",
+  "reportPrivateUsage": "error",
+  "reportTypeCommentUsage": "error",
+  "reportMatchNotExhaustive": "error",
+
+  // Deprecated/compatibility
+  "reportDeprecated": "warning",
+  "reportIncompatibleMethodOverride": "error",
+  "reportIncompatibleVariableOverride": "error",
+
+  // Call-related issues
+  "reportCallInDefaultInitializer": "error",
+  "reportArgumentType": "error",
+  "reportAssignmentType": "error",
+  "reportAttributeAccessIssue": "error",
+  "reportIndexIssue": "error",
+  "reportOperatorIssue": "error",
+  "reportRedeclaration": "error",
+  "reportReturnType": "error",
+
+  // Overrides for test files (slightly less strict)
+  "overrides": [
+    {
+      "include": ["tests/**/*.py"],
+      "reportUnknownMemberType": "none",
+      "reportUnknownArgumentType": "warning",
+      "reportUnknownVariableType": "warning",
+      "reportMissingParameterType": "warning",
+      "reportPrivateUsage": "none"
+    }
+  ]
+}

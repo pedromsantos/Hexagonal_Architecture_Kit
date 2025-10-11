@@ -1,0 +1,99 @@
+[project]
+name = "katacombs-api"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Pedro Santos", email = "pedromsantos@users.noreply.github.com" },
+]
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi>=0.118.3",
+    "pydantic>=2.12.0",
+    "python-multipart>=0.0.20",
+    "uvicorn[standard]>=0.37.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "black>=25.9.0",
+    "httpx>=0.28.1",
+    "isort>=7.0.0",
+    "pyright>=1.1.406",
+    "pytest>=8.4.2",
+    "pytest-asyncio>=1.2.0",
+    "ruff>=0.14.0",
+]
+
+[project.scripts]
+katacombs-api = "katacombs_api.main:main"
+
+[build-system]
+requires = ["uv_build>=0.9.2,<0.10.0"]
+build-backend = "uv_build"
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "E501", # line too long, handled by black
+    "B008", # do not perform function calls in argument defaults
+    "C901", # too complex
+    "COM812", # conflicts with formatter
+    "D100", # missing docstring in public module
+    "D101", # missing docstring in public class
+    "D102", # missing docstring in public method
+    "D103", # missing docstring in public function
+    "D104", # missing docstring in public package
+    "D105", # missing docstring in public module
+    "D203", # conflicts with D211
+    "D213", # conflicts with D212
+]
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["S101", "PLR2004", "D", "ANN"]
+"**/__init__.py" = ["F401", "D104"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["katacombs_api"]
+
+[tool.ruff.lint.pylint]
+max-args = 5
+max-branches = 12
+max-returns = 6
+max-statements = 50
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+[tool.black]
+target-version = ['py311']
+line-length = 88
+skip-string-normalization = true
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 88
+known_first_party = ["katacombs_api"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = ["--strict-markers", "--strict-config", "--verbose"]
+markers = [
+    "unit: Unit tests",
+    "integration: Integration tests",
+    "acceptance: Acceptance tests",
+    "contract: Contract tests",
+]
+
+[tool.pyright]
+pythonPlatform = "Linux"
+typeCheckingMode = "strict"
