@@ -200,14 +200,14 @@ Tests: All unit tests passing
 
 ### Planning Phase Agents (Conditional Usage)
 
-**user_story_writer** (Use when: No user stories exist):
+**writers/planning/user_story** (Use when: No user stories exist):
 
 - Input: Business requirement or feature request
 - Output: User story with acceptance criteria
-- Next: user_story_review
+- Next: reviewers/user_story
 - **Skip if**: You already have written user stories
 
-**user_story_review** (Use when: Stories need validation OR after slicing):
+**reviewers/user_story** (Use when: Stories need validation OR after slicing):
 
 - Input: User story (from writer or existing) OR sliced stories
 - Output: Quality validation report (pass/fail with score)
@@ -215,32 +215,26 @@ Tests: All unit tests passing
   - Validates INVEST criteria compliance (85%+ score required)
   - Checks domain concept identification
   - Validates acceptance criteria quality
-- Next: user_story_slicer (if fails size) OR hexagonal_architect (if passes)
+- Next: writers/planning/story_slicer (if fails size) OR writers/planning/architect (if passes)
 - **Skip if**: Stories already validated as implementation-ready
 
-**user_story_slicer** (Use when: Stories too large >5 days):
+**writers/planning/story_slicer** (Use when: Stories too large >5 days):
 
 - Input: Large user story (failed size validation from review)
 - Output: Multiple vertical slices delivering business value
-- Next: user_story_review (quick validation of slices)
+- Next: reviewers/user_story (quick validation of slices)
 - **Skip if**: Stories are already right-sized for implementation
 
-**hexagonal_architect** (Always required before implementation):
+**writers/planning/architect** (Always required before implementation):
 
 - Input: Quality user story or slices
 - Output: Architecture plan (aggregates, ports, adapters, CQRS split)
-- Next: acceptance_test_writer
+- Next: writers/tests/acceptance
 - **Never skip**: Essential for every story
-
-**hexagonal_architect**:
-
-- Input: User story slice
-- Output: Architecture plan (aggregates, ports, adapters, CQRS split)
-- Next: acceptance_test_writer
 
 ### Test-Writing Phase Agents
 
-**acceptance_test_writer**:
+**writers/tests/acceptance**:
 
 - Input: Architecture plan
 - Output: Failing acceptance test for COMPLETE business flow
@@ -250,9 +244,9 @@ Tests: All unit tests passing
   - Mocks ALL adapters (repositories AND external services)
   - Uses real domain objects
   - Should FAIL for the right reason
-- Next: unit_test_writer (loop until acceptance GREEN)
+- Next: writers/tests/unit (loop until acceptance GREEN)
 
-**unit_test_writer**:
+**writers/tests/unit**:
 
 - Input: Acceptance test failure
 - Output: Failing unit test for next component
@@ -263,7 +257,7 @@ Tests: All unit tests passing
   - Verifies commands, not queries
 - Next: Implementation agents
 
-**integration_test_writer**:
+**writers/tests/integration**:
 
 - Input: Repository interface
 - Output: Integration test with real database
@@ -271,18 +265,18 @@ Tests: All unit tests passing
   - Uses real external system
   - No mocks at boundary
   - Tests data transformation
-- Next: repository_implementer
+- Next: Implementation agents (repository)
 
-**contract_test_writer**:
+**writers/tests/contract**:
 
 - Input: API specification
 - Output: HTTP contract tests
 - Requirements:
   - Tests status codes, headers, validation
   - No business logic testing
-- Next: driving_adapter_implementer
+- Next: Implementation agents (controller)
 
-**e2e_test_writer** (Optional):
+**writers/tests/e2e** (Optional):
 
 - Input: Complete feature
 - Output: Full system test
@@ -292,7 +286,7 @@ Tests: All unit tests passing
 
 ### Implementation Phase Agents
 
-**aggregate_implementer**:
+**writers/domain/aggregate**:
 
 - Input: Domain requirements from unit test
 - Output: Complete aggregate (root + entities + value objects)
@@ -304,18 +298,18 @@ Tests: All unit tests passing
   - Ensure proper encapsulation
   - Add traversal methods
 
-**domain_service_implementer**:
+**writers/domain/domain_service**:
 
 - Input: Cross-aggregate business logic
 - Output: Stateless domain service
 - Use only when logic doesn't fit in single aggregate
 
-**domain_event_implementer**:
+**writers/domain/events**:
 
 - Input: State change that needs notification
 - Output: Immutable domain event (past tense)
 
-**command_handler_implementer** (CQRS Write):
+**writers/application/command** (CQRS Write):
 
 - Input: Command DTO, domain objects
 - Output: Use case that orchestrates domain
@@ -326,7 +320,7 @@ Tests: All unit tests passing
   - Publish events
   - Return simple response DTO
 
-**query_handler_implementer** (CQRS Read):
+**writers/application/query** (CQRS Read):
 
 - Input: Query DTO
 - Output: Query handler bypassing domain
@@ -335,7 +329,7 @@ Tests: All unit tests passing
   - Return DTOs optimized for UI
   - No domain logic execution
 
-**repository_interface_designer**:
+**writers/infrastructure/repository_interface**:
 
 - Input: Aggregate root
 - Output: Repository interface in domain layer
@@ -344,7 +338,7 @@ Tests: All unit tests passing
   - Domain language methods
   - Returns domain objects
 
-**repository_implementer**:
+**writers/infrastructure/repository**:
 
 - Input: Repository interface
 - Output: Database-specific implementation
@@ -353,7 +347,7 @@ Tests: All unit tests passing
   - Translate domain ↔ persistence models
   - Implement transactions
 
-**driving_adapter_implementer**:
+**writers/infrastructure/controller**:
 
 - Input: Use case interface
 - Output: HTTP controller or CLI handler
@@ -362,7 +356,7 @@ Tests: All unit tests passing
   - Framework-specific concerns only
   - No business logic
 
-**external_service_adapter_implementer**:
+**writers/infrastructure/external_adapter**:
 
 - Input: External service port
 - Output: API client adapter
@@ -371,7 +365,7 @@ Tests: All unit tests passing
   - Map external models to domain
   - Include error handling
 
-**database_migration_writer**:
+**writers/infrastructure/migration**:
 
 - Input: Domain model changes
 - Output: Migration scripts
@@ -382,7 +376,7 @@ Tests: All unit tests passing
 
 ### Review Phase Agents
 
-**user_story_review**:
+**reviewers/user_story**:
 
 - Validates INVEST criteria compliance
 - Checks domain concept identification
@@ -391,33 +385,40 @@ Tests: All unit tests passing
 - Confirms architectural alignment
 - Quality score calculation and gates
 
-**test_reviewer**:
+**reviewers/test**:
 
 - Validates proper test classification
 - Checks mocking discipline
 - Ensures mock verification rules
 - Identifies misclassified tests
 
-**code_reviewer**:
+**reviewers/code**:
 
 - Reviews against ALL RULES.md patterns
 - Entity, value object, aggregate compliance
 - Repository pattern validation
 - Naming convention compliance
 
-**hexagonal_architecture_reviewer**:
+**reviewers/hexagonal**:
 
 - Validates 1:1 aggregate-repository
 - Checks dependency flow
 - Ensures layer boundaries
 - Verifies port/adapter patterns
 
-**cqrs_reviewer**:
+**reviewers/cqrs**:
 
 - Validates command/query separation
 - Ensures commands through domain
 - Verifies queries bypass domain
 - Checks write/read repository split
+
+**reviewers/ddd**:
+
+- Validates DDD tactical patterns
+- Ensures proper aggregate design
+- Verifies bounded context boundaries
+- Validates ubiquitous language usage
 
 ## Workflow Examples
 
