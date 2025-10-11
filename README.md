@@ -13,183 +13,105 @@ This repository contains:
 
 These files serve as reference materials that you can copy into your own projects to maintain consistent architectural patterns and executable architectural governance.
 
-## How to Use This Kit in Your Project
-
-### Option 1: For AI-Assisted Development (Recommended)
-
-#### If Starting a New Project (using Claude Code `/init`)
-
-1. **Run `/init`** in your new project to generate a basic CLAUDE.md file
-2. **Copy [RULES.md](RULES.md)** into your project's root directory
-3. **Merge the architecture guidelines** into your generated CLAUDE.md:
-   - Open both your generated `CLAUDE.md` and this kit's [AI_PROMPT_TEMPLATE.md](AI_PROMPT_TEMPLATE.md)
-   - Copy these sections from AI_PROMPT_TEMPLATE.md into your CLAUDE.md:
-     - `## Architecture Rules` (complete section)
-     - `## TDD & Development Methodology` (complete section)
-     - `## Aggregate-Repository Pattern & Traversal` (complete section)
-   - Keep the project-specific sections from your generated CLAUDE.md
-
-#### If Adding to an Existing Project
-
-1. **Copy [AI_PROMPT_TEMPLATE.md](AI_PROMPT_TEMPLATE.md)** to your project as `CLAUDE.md` (or `.claude/CLAUDE.md`)
-
-   - Update the "Project Overview" section with your specific project details
-   - All TDD and architecture guidelines are already included
-
-2. **Copy [RULES.md](RULES.md)** into your project's root directory
-   - This provides detailed implementation rules and code examples
-   - Referenced from your CLAUDE.md for easy lookup
-
-### Option 2: For Other AI Coding Assistants
-
-#### Using with Cursor
-
-1. **Copy [RULES.md](RULES.md)** into your project's root directory
-2. **Create `.cursorrules`** file in your project root
-3. **Copy the content** from [AI_PROMPT_TEMPLATE.md](AI_PROMPT_TEMPLATE.md) into `.cursorrules`
-4. Cursor will automatically read and follow these rules when assisting with code
-
-#### Using with GitHub Copilot
-
-1. **Copy [RULES.md](RULES.md)** into your project's root directory or `docs/` folder
-2. **Create a `CONTRIBUTING.md`** or add to your project's README:
-   - Reference the architectural patterns from RULES.md
-   - Include key principles in your documentation
-3. **Use Copilot Chat** with prompts like:
-   - "Follow the DDD patterns in RULES.md to create a User entity"
-   - "Implement this use case following the patterns in RULES.md"
-4. Copilot will use your project documentation as context
-
-#### Using with Windsurf
-
-1. **Copy [RULES.md](RULES.md)** into your project's root directory
-2. **Create `.windsurfrules`** file in your project root
-3. **Copy the content** from [AI_PROMPT_TEMPLATE.md](AI_PROMPT_TEMPLATE.md) into `.windsurfrules`
-4. Windsurf will automatically read and follow these rules when generating code
-
-### Option 3: Manual Reference
-
-Use this repository as a reference while coding:
-
-1. Keep the [RULES.md](RULES.md) open in a browser or editor
-2. Refer to specific sections as you implement features
-3. Copy relevant code examples and adapt them to your domain
-
-### What to Include in Your Project
-
-**Essential files to copy:**
-
-- `AI_PROMPT_TEMPLATE.md` → your project's AI assistant config file (CLAUDE.md, .cursorrules, .windsurfrules, etc.)
-- `RULES.md` - Implementation rules and code examples
-- `agents/` directory (optional) - For automated architecture reviews and TDD guidance
-- `examples/` directory (optional) - For reference on using agents
-
-**What NOT to copy:**
-
-- This README (it's specific to the kit repository)
-- The `.git` directory
-
-## Key Patterns Documented
-
-### Domain Driven Design (DDD)
-
-- Entity and Value Object design
-- Aggregate boundaries and rules
-- Domain Services
-- Repository patterns
-- Domain Events
-
-### Ports & Adapters (Hexagonal Architecture)
-
-- Primary Ports (driving adapters - web controllers, CLI)
-- Secondary Ports (driven adapters - databases, external APIs)
-- Adapter implementations organized by technology
-- Dependency injection and configuration
-
-### Test-Driven Development (Pedro's Algorithm - London School)
-
-- Outside-In TDD: Start with acceptance test, work inside-out
-- Complete TDD cycle: Acceptance (RED) → Unit Tests → Integration → Contract → E2E
-- Mock ONLY adapters (driven ports), never domain entities
-- Separate verification of commands (side effects) vs queries (data retrieval)
-
-### Integration Patterns
-
-- Repositories as secondary ports
-- Use cases as primary port implementations
-- Event-driven architecture
-- Cross-cutting concerns handling
-
-## Quick Start Example
-
-Here's how the patterns work together:
-
-```python
-# Domain Layer - Business logic, no infrastructure concerns
-class User:  # Entity
-    def __init__(self, sid: Sid, email: Email):
-        self._sid = sid
-        self._email = email
-
-    def change_email(self, new_email: Email) -> UserEmailChanged:
-        old_email = self._email
-        self._email = new_email
-        return UserEmailChanged(user_sid=self._sid, old_email=old_email, new_email=new_email)
-
-# Domain Layer - Exit point interface (Driven Port)
-class UserRepository(ABC):
-    @abstractmethod
-    def save(self, user: User) -> None:
-        pass
-
-# Application Layer - Orchestration (Use Case)
-class ChangeUserEmailUseCase:
-    def __init__(self, user_repo: UserRepository):
-        self._user_repo = user_repo
-
-    def execute(self, command: ChangeUserEmailCommand) -> None:
-        user = self._user_repo.find_by_sid(command.user_sid)
-        event = user.change_email(command.new_email)
-        self._user_repo.save(user)
-
-# Infrastructure Layer - Entry point (Driving Adapter)
-@app.post("/users/{user_id}/email")
-def change_email_endpoint(user_id: str, request: ChangeEmailRequest):
-    command = ChangeUserEmailCommand(user_sid=Sid(user_id), new_email=Email(request.email))
-    use_case.execute(command)
-    return {"status": "success"}
-
-# Infrastructure Layer - Exit point implementation (Driven Adapter)
-class PostgresUserRepository(UserRepository):
-    def save(self, user: User) -> None:
-        # SQL implementation details
-        pass
-```
-
 ## Specialized Claude Code Agents
 
-This kit includes specialized agents that provide **executable architectural governance** by automating code reviews and guidance.
+This kit includes an **orchestrator-based agent system** that provides **executable architectural governance** by coordinating specialized agents through Pedro's Algorithm (London School TDD).
 
-### How to Use Agents
+### The Orchestrator-Agent System
 
-Agents are specialized instructions that you can reference in your conversations with Claude Code:
+The agent system follows a **conductor-orchestra model**:
 
-**Method 1: Direct Reference in Conversation**
+- **🎼 [Orchestrator](agents/orchestrator.md)** - The conductor who coordinates everything
+- **🎻 Specialized Agents** - The musicians, each expert in their domain
+
+**You interact with the ORCHESTRATOR, not individual agents directly.**
+
+The orchestrator:
+
+1. Assesses what you have (requirements, stories, architecture plan, etc.)
+2. Determines the correct workflow entry point
+3. Invokes specialized agents in the proper sequence
+4. Enforces quality gates and Pedro's Algorithm
+5. Ensures acceptance tests stay RED until feature complete
+6. Maintains commit discipline (only on GREEN)
+
+### How to Use the Orchestrator
+
+**Step 1: Tell the orchestrator what you have**
+
+The orchestrator will automatically determine where to start based on your situation:
+
+| You Have                  | Orchestrator Starts At               | Skips                      |
+| ------------------------- | ------------------------------------ | -------------------------- |
+| Raw business requirements | Planning (user story creation)       | None                       |
+| Written user stories      | Story validation & quality review    | User story writing         |
+| Validated user stories    | Architecture planning                | Story writing & review     |
+| Architecture plan ready   | Acceptance test writing (TDD starts) | All planning phases        |
+| Acceptance test written   | TDD implementation cycle             | Planning & acceptance test |
+
+**Step 2: Example conversations**
 
 ```
-Please review my code following @agents/hexagonal_architecture_review.md
+"I need to implement user registration with email confirmation"
+→ Orchestrator: No stories exist, starts planning phase
+
+"I have this user story: 'As a user, I want to register...'"
+→ Orchestrator: Story exists, validates quality first
+
+"I have a validated story and architecture plan ready"
+→ Orchestrator: Ready for TDD, writes acceptance test first
 ```
 
-**Method 2: Using Task Tool**
-Claude Code can automatically launch agents using the Task tool when appropriate. Simply ask:
+**Step 3: Follow the orchestrator's guidance**
 
-```
-"Review my CQRS implementation for violations"
-"Help me implement user registration using London School TDD"
+The orchestrator will:
+
+- Invoke the right agents at the right time
+- Keep you in the RED → GREEN → REFACTOR cycle
+- Ensure proper test boundaries (unit vs acceptance vs integration)
+- Run review agents before allowing commits
+- Deliver working, tested, architecturally-sound features
+
+### Complete Workflow Example
+
+```txt
+You: "I need user registration with email confirmation"
+
+Orchestrator Assessment:
+- No user stories exist
+- Entry Point: writers/planning/user_story
+- Workflow: Planning → TDD → Review
+
+Orchestrator Execution:
+1. writers/planning/user_story → Creates story
+2. reviewers/user_story → ❌ Too large (8 days)
+3. writers/planning/story_slicer → Splits into 2 slices
+4. reviewers/user_story → ✅ Both slices pass
+5. writers/planning/architect → Architecture plan
+
+For each slice:
+6. writers/tests/acceptance → Failing test (RED)
+7. Loop while RED:
+   - writers/tests/unit → Failing unit test
+   - writers/domain/aggregate → Domain objects (GREEN)
+   - Commit
+8. writers/tests/integration → Real database tests
+9. writers/infrastructure/repository → Repository implementation
+10. writers/tests/contract → API contract tests
+11. writers/infrastructure/controller → HTTP endpoints
+12. All reviewers → Quality gates
+13. Final commit → Feature complete ✅
 ```
 
-**Method 3: Slash Commands (if available)**
-Some projects may configure custom slash commands that invoke agents.
+### Quick Reference
+
+**For complete documentation on the agent system, see [agents/README.md](agents/README.md)**
+
+**Key Resources:**
+
+- [orchestrator.md](agents/orchestrator.md) - How the orchestrator coordinates agents
+- [agents/README.md](agents/README.md) - Complete agent catalog and usage guide
+- Individual agent files - Detailed instructions for each specialized agent
 
 ### Available Agents
 
@@ -318,6 +240,161 @@ Agents transform architectural documentation into **executable governance**:
 - **Specific Fixes**: Get actionable code examples, not just descriptions
 - **Learning Tool**: Understand patterns through detailed feedback
 - **Continuous Governance**: Run reviews on every commit/PR
+
+## Alternative Ways to Use This Kit
+
+While the **Claude Code orchestrator system** (described above) is the recommended approach, you can also use this kit with other tools:
+
+### Option 1: With Claude Code (Integrates with Orchestrator)
+
+#### If Starting a New Project (using Claude Code `/init`)
+
+1. **Run `/init`** in your new project to generate a basic CLAUDE.md file
+2. **Copy [RULES.md](RULES.md)** into your project's root directory
+3. **Merge the architecture guidelines** into your generated CLAUDE.md:
+   - Open both your generated `CLAUDE.md` and this kit's [AI_PROMPT_TEMPLATE.md](AI_PROMPT_TEMPLATE.md)
+   - Copy these sections from AI_PROMPT_TEMPLATE.md into your CLAUDE.md:
+     - `## Architecture Rules` (complete section)
+     - `## TDD & Development Methodology` (complete section)
+     - `## Aggregate-Repository Pattern & Traversal` (complete section)
+   - Keep the project-specific sections from your generated CLAUDE.md
+
+#### If Adding to an Existing Project
+
+1. **Copy [AI_PROMPT_TEMPLATE.md](AI_PROMPT_TEMPLATE.md)** to your project as `CLAUDE.md` (or `.claude/CLAUDE.md`)
+
+   - Update the "Project Overview" section with your specific project details
+   - All TDD and architecture guidelines are already included
+
+2. **Copy [RULES.md](RULES.md)** into your project's root directory
+   - This provides detailed implementation rules and code examples
+   - Referenced from your CLAUDE.md for easy lookup
+
+### Option 2: With Other AI Assistants (Manual Workflow)
+
+#### Using with Cursor
+
+1. **Copy [RULES.md](RULES.md)** into your project's root directory
+2. **Create `.cursorrules`** file in your project root
+3. **Copy the content** from [AI_PROMPT_TEMPLATE.md](AI_PROMPT_TEMPLATE.md) into `.cursorrules`
+4. Cursor will automatically read and follow these rules when assisting with code
+
+#### Using with GitHub Copilot
+
+1. **Copy [RULES.md](RULES.md)** into your project's root directory or `docs/` folder
+2. **Create a `CONTRIBUTING.md`** or add to your project's README:
+   - Reference the architectural patterns from RULES.md
+   - Include key principles in your documentation
+3. **Use Copilot Chat** with prompts like:
+   - "Follow the DDD patterns in RULES.md to create a User entity"
+   - "Implement this use case following the patterns in RULES.md"
+4. Copilot will use your project documentation as context
+
+#### Using with Windsurf
+
+1. **Copy [RULES.md](RULES.md)** into your project's root directory
+2. **Create `.windsurfrules`** file in your project root
+3. **Copy the content** from [AI_PROMPT_TEMPLATE.md](AI_PROMPT_TEMPLATE.md) into `.windsurfrules`
+4. Windsurf will automatically read and follow these rules when generating code
+
+### Option 3: Manual Reference
+
+Use this repository as a reference while coding:
+
+1. Keep the [RULES.md](RULES.md) open in a browser or editor
+2. Refer to specific sections as you implement features
+3. Copy relevant code examples and adapt them to your domain
+
+### What to Include in Your Project
+
+**Essential files to copy:**
+
+- `AI_PROMPT_TEMPLATE.md` → your project's AI assistant config file (CLAUDE.md, .cursorrules, .windsurfrules, etc.)
+- `RULES.md` - Implementation rules and code examples
+- `agents/` directory (optional) - For automated architecture reviews and TDD guidance
+- `examples/` directory (optional) - For reference on using agents
+
+**What NOT to copy:**
+
+- This README (it's specific to the kit repository)
+- The `.git` directory
+
+## Key Patterns Documented
+
+### Domain Driven Design (DDD)
+
+- Entity and Value Object design
+- Aggregate boundaries and rules
+- Domain Services
+- Repository patterns
+- Domain Events
+
+### Ports & Adapters (Hexagonal Architecture)
+
+- Primary Ports (driving adapters - web controllers, CLI)
+- Secondary Ports (driven adapters - databases, external APIs)
+- Adapter implementations organized by technology
+- Dependency injection and configuration
+
+### Test-Driven Development (Pedro's Algorithm - London School)
+
+- Outside-In TDD: Start with acceptance test, work inside-out
+- Complete TDD cycle: Acceptance (RED) → Unit Tests → Integration → Contract → E2E
+- Mock ONLY adapters (driven ports), never domain entities
+- Separate verification of commands (side effects) vs queries (data retrieval)
+
+### Integration Patterns
+
+- Repositories as secondary ports
+- Use cases as primary port implementations
+- Event-driven architecture
+- Cross-cutting concerns handling
+
+## Quick Start Example
+
+Here's how the patterns work together:
+
+```python
+# Domain Layer - Business logic, no infrastructure concerns
+class User:  # Entity
+    def __init__(self, sid: Sid, email: Email):
+        self._sid = sid
+        self._email = email
+
+    def change_email(self, new_email: Email) -> UserEmailChanged:
+        old_email = self._email
+        self._email = new_email
+        return UserEmailChanged(user_sid=self._sid, old_email=old_email, new_email=new_email)
+
+# Domain Layer - Exit point interface (Driven Port)
+class UserRepository(ABC):
+    @abstractmethod
+    def save(self, user: User) -> None:
+        pass
+
+# Application Layer - Orchestration (Use Case)
+class ChangeUserEmailUseCase:
+    def __init__(self, user_repo: UserRepository):
+        self._user_repo = user_repo
+
+    def execute(self, command: ChangeUserEmailCommand) -> None:
+        user = self._user_repo.find_by_sid(command.user_sid)
+        event = user.change_email(command.new_email)
+        self._user_repo.save(user)
+
+# Infrastructure Layer - Entry point (Driving Adapter)
+@app.post("/users/{user_id}/email")
+def change_email_endpoint(user_id: str, request: ChangeEmailRequest):
+    command = ChangeUserEmailCommand(user_sid=Sid(user_id), new_email=Email(request.email))
+    use_case.execute(command)
+    return {"status": "success"}
+
+# Infrastructure Layer - Exit point implementation (Driven Adapter)
+class PostgresUserRepository(UserRepository):
+    def save(self, user: User) -> None:
+        # SQL implementation details
+        pass
+```
 
 ## Language Support
 
