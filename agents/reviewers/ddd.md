@@ -198,6 +198,50 @@ class Email:
             raise ValueError("Invalid email format")
 ```
 
+## Business Rule Validation Movement Patterns
+
+### Moving Validation to Domain Layer
+
+**When moving validation from application layer to domain:**
+
+✅ **Minimal Change Approach**: Add validation to entity constructor/factory
+✅ **Keep Scope Limited**: Don't add new architectural layers unless explicitly needed
+✅ **Domain Exception**: Create specific domain exception for validation failures
+
+```python
+# ❌ Validation in application layer (command handler)
+class StartGameCommandHandler:
+    def handle(self, request):
+        if not self._is_valid_player_name(request.player_name):  # Wrong layer!
+            return failure_response()
+        # ... rest of logic
+
+# ✅ Validation in domain layer (entity)
+class Player:
+    def __init__(self, name: str):
+        self._validate_name(name)  # Business rule in domain!
+        self._name = name
+
+    @staticmethod
+    def _validate_name(name: str) -> None:
+        if not name or not name.strip():
+            raise InvalidPlayerNameError()  # Domain exception
+```
+
+**Common Anti-Patterns When Moving Validation:**
+
+❌ **Scope Creep**: Simple validation move → Full CQRS refactor
+❌ **Infrastructure Addition**: Adding query handlers for basic domain changes
+❌ **Layer Explosion**: Creating new use cases when domain logic suffices
+
+**Validation Movement Checklist:**
+
+- [ ] Move validation logic to domain entity/value object
+- [ ] Create specific domain exception class
+- [ ] Update application layer to catch domain exception
+- [ ] Keep response structure unchanged (don't add infrastructure)
+- [ ] Apply YAGNI - don't add query handlers unless explicitly needed
+
 ### 3. Aggregate Rules (RULES.md Section 3)
 
 **Check**:
