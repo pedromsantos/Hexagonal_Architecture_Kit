@@ -21,6 +21,8 @@ Analyze user story slices and create detailed architecture plans specifying aggr
   - **Domain Methods**: [List key business behavior methods - THIS IS REQUIRED]
   - Business Rules: [Key invariants]
   - Repository: [RepositoryName]
+    - **YAGNI**: Only include methods needed for current stories
+    - Example: Story 1 needs `save()` and `find_by_sid()` only
 
 **⚠️ MANDATORY: Always include Domain Methods section with business behavior**
 
@@ -582,6 +584,36 @@ ORDER BY created_at DESC;
 - ❌ WRONG: LocationRepository for internal entity
 - ✅ RIGHT: WorldRepository for World aggregate
 - Aggregate handles internal traversal
+
+### Repository Methods - Follow YAGNI Principle?
+
+**CRITICAL: Only include methods needed for current user stories**
+
+✅ Include repository method when:
+
+- **Current story needs it** - Method is used in the story being implemented
+- **Test requires it** - Acceptance test calls this method
+- **Command handler uses it** - Application orchestration needs this operation
+
+❌ DON'T include method for:
+
+- **Future stories** - "We might need delete() later" → Add when Story 6 needs it
+- **Complete CRUD** - Don't auto-add Create, Read, Update, Delete
+- **Theoretical needs** - "Repositories should have find_all()" → Add when actually needed
+- **Framework expectations** - Only add methods that solve real business problems
+
+**Examples:**
+
+- ❌ WRONG: `PlayerRepository` with `save()`, `find_by_sid()`, `find_all()`, `delete()`, `update()`
+- ✅ RIGHT: Story 1 needs only `save()` and `find_by_sid()` → Only include those two
+- ✅ RIGHT: Add `delete()` method when implementing Story 6 (Quit Game)
+
+**Why YAGNI matters:**
+
+- Reduces implementation effort - fewer fake repositories to write
+- Cleaner interfaces - only essential methods
+- Easier testing - fewer methods to mock
+- Forces thinking about actual requirements
 
 ### Domain Services vs Aggregate Methods?
 

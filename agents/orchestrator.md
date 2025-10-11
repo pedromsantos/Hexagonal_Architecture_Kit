@@ -108,16 +108,62 @@ FOR EACH SLICE:
 
 ## Core Principles You Must Enforce
 
-### 1. Acceptance Test Stays RED
+### 1. YAGNI - You Aren't Gonna Need It
 
-**CRITICAL**: The acceptance test must remain RED until the complete feature is implemented.
+**FUNDAMENTAL TDD RULE**: Never create production code that isn't required by a failing test.
+
+**🎯 CORE PRINCIPLE: Do not create ANY production code that is not in service of a test.**
+
+- ✅ **Only write code needed by current failing test**
+- ✅ **Repository methods**: Only add methods used in current story (e.g., Story 1 needs `save()` and `find_by_sid()` only)
+- ✅ **Domain methods**: Only implement behavior tested by current acceptance test
+- ✅ **Value objects**: Only add validation rules that current test requires
+- ✅ **Ports/Interfaces**: Only create ports that current test needs to mock
+- ❌ **NEVER anticipate future needs**: "We might need delete() later" → Add when Story 6 actually needs it
+- ❌ **NEVER create complete CRUD**: Don't auto-add Create, Read, Update, Delete
+- ❌ **NEVER add "nice to have" methods**: Only solve real, tested problems
+- ❌ **NEVER create ports "just in case"**: TimeProviderPort not needed if no test requires timestamps
+
+**Examples of violations:**
+
+- Creating `TimeProviderPort` when no test needs timestamps
+- Adding `delete()` method when only `save()` and `find_by_sid()` are tested
+- Implementing full validation when test only checks one rule
+- Creating complete domain events when acceptance test doesn't verify them
+
+**Why YAGNI matters:**
+
+- Reduces implementation effort
+- Cleaner, focused interfaces
+- Easier testing (fewer methods to mock)
+- Forces thinking about actual requirements
+- Prevents over-engineering
+
+### 2. Test-Driven Development Cycle
+
+**STRICT RED → GREEN → REFACTOR cycle**:
+
+**🚫 ACCEPTANCE TEST STAYS RED**: The acceptance test must remain RED until the complete feature is implemented.
 
 - ✅ Acceptance test fails initially
 - ✅ Unit tests pass one by one
 - ✅ Acceptance test finally passes when all pieces complete
 - ❌ NEVER make acceptance test pass prematurely
 
-### 2. Commit Discipline
+**RED → GREEN → REFACTOR Rules:**
+
+- 🔴 **RED**: Write failing test first (acceptance or unit)
+- 🟢 **GREEN**: Write MINIMAL code to make test pass
+- 🔵 **REFACTOR**: Improve code while keeping tests green
+
+**Critical Rules:**
+
+- ❌ **NEVER write production code without a failing test**
+- ❌ **NEVER write more code than needed to pass the test**
+- ✅ **Always start with the test that forces you to write the code**
+- ✅ **Each test should require you to write new production code**
+
+### 3. Commit Discipline
 
 **ONLY commit when**:
 
@@ -136,7 +182,7 @@ FOR EACH SLICE:
 
 Tests: All unit tests passing
 
-### 3. Tidy First Approach
+### 4. Tidy First Approach
 
 **Separate structural from behavioral changes**:
 
